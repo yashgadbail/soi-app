@@ -18,7 +18,7 @@ class ProfileScreen extends ConsumerWidget {
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
     final l = AppLocalizations.of(context);
-    final ok = await confirmDialog(context, title: l.profileSignOutConfirmTitle, body: l.profileSignOutConfirmBody, confirmLabel: l.commonSignOut);
+    final ok = await confirmDialog(context, title: l.profileSignOutConfirmTitle, body: l.profileSignOutConfirmBody, confirmLabel: l.commonSignOut, cancelLabel: l.dialogStaySignedIn, icon: Icons.logout);
     if (!ok || !context.mounted) return;
     try {
       await ref.read(authRepoProvider).signOut();
@@ -38,7 +38,9 @@ class ProfileScreen extends ConsumerWidget {
       title: l.profileDeleteConfirmTitle,
       body: l.profileDeleteConfirmBody,
       confirmLabel: l.profileDeleteConfirmAction,
+      cancelLabel: l.dialogKeepAccount,
       destructive: true,
+      icon: Icons.delete_forever_outlined,
     );
     if (!ok || !context.mounted) return;
     try {
@@ -63,7 +65,8 @@ class ProfileScreen extends ConsumerWidget {
 
     if (!s.isSignedIn) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.profileTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(l.profileTitle)),
         body: SignedOutView(
           icon: Icons.person_outline,
           onSignIn: () => const SignInRoute(from: '/profile').push<void>(context),
@@ -72,9 +75,9 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.profileTitle)),
-      body: ListView(
-        padding: pagePadding,
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(l.profileTitle)),
+      body: PageListView(
         children: [
           SoiCard(
             onTap: () => const NameEditRoute().push<void>(context),
@@ -125,18 +128,6 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () => const ClaimRoute().push<void>(context),
             icon: const Icon(Icons.school_outlined),
             label: Text(l.profileLinkSchool),
-          ),
-          const SizedBox(height: Space.xl),
-          SectionLabel(l.profileAppearance),
-          SoiCard(
-            padding: const EdgeInsets.symmetric(horizontal: Space.lg, vertical: Space.md),
-            child: Row(
-              children: [
-                Icon(Icons.brightness_auto_outlined, color: c.muted),
-                const SizedBox(width: Space.md),
-                Expanded(child: Text(l.profileAppearanceSystem, style: context.text.bodyMedium)),
-              ],
-            ),
           ),
           const SizedBox(height: Space.xl),
           SectionLabel(l.profileLegal),

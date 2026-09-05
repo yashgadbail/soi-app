@@ -40,6 +40,3 @@ Future<List<OrgMember>> orgMembers(Ref ref, String orgId) => ref.watch(orgsRepoP
 
 @riverpod
 Future<List<OrgInvite>> orgInvites(Ref ref, String orgId) => ref.watch(orgsRepoProvider).invites(orgId);
-
-/// The causes offered as chips when publishing. Free text is also allowed.
-const kCauses = ['Environment', 'Education', 'Health', 'Community', 'Animal welfare', 'Disaster relief'];

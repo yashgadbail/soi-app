@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:soi/core/theme/tokens.dart';
@@ -9,6 +8,22 @@ import 'package:soi/core/theme/tokens.dart';
 /// radii or paddings inline. If a screen needs a raw colour, add a token.
 abstract final class SoiTheme {
   static const fontFamily = 'Inter';
+
+  /// Transparent, non-scrimmed system bars so the page colour runs under the
+  /// status bar like the platform apps do. Icons follow the theme.
+  static SystemUiOverlayStyle systemBars({required bool dark}) => SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: dark ? Brightness.dark : Brightness.light,
+        systemStatusBarContrastEnforced: false,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarContrastEnforced: false,
+      );
+
+  /// Light icons for screens that open on the deep-green hero.
+  static SystemUiOverlayStyle get systemBarsOnDark => systemBars(dark: true);
 
   static ThemeData light() => _build(Brightness.light, SoiColors.light);
   static ThemeData dark() => _build(Brightness.dark, SoiColors.dark);
@@ -53,28 +68,27 @@ abstract final class SoiTheme {
       colorScheme: scheme,
       fontFamily: fontFamily,
       textTheme: text,
-      scaffoldBackgroundColor: c.bgAlt,
+      // Pages are transparent over the shared BrandBackdrop (see SoiApp).
+      scaffoldBackgroundColor: Colors.transparent,
       canvasColor: c.bgAlt,
       splashFactory: InkSparkle.splashFactory,
       visualDensity: VisualDensity.standard,
       extensions: [c],
       appBarTheme: AppBarTheme(
-        backgroundColor: c.bgAlt,
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         foregroundColor: c.ink,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: text.titleLarge,
-        systemOverlayStyle: isDark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
+        systemOverlayStyle: SoiTheme.systemBars(dark: isDark),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: c.bg,
         surfaceTintColor: Colors.transparent,
         indicatorColor: c.greenSoft,
-        height: 68,
+        height: 72,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => text.labelMedium!.copyWith(
             color: states.contains(WidgetState.selected) ? c.green : c.muted,
@@ -218,7 +232,9 @@ abstract final class SoiTheme {
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          // Pages are transparent over a shared backdrop, so a crossfade
+          // (not a slide that reveals the page beneath) is used on iOS too.
+          TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
         },
       ),
     );

@@ -56,8 +56,8 @@ class _OnboardingNameScreenState extends ConsumerState<OnboardingNameScreen> {
     final l = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: pagePadding.copyWith(top: Space.xxxl),
+        child: PageScrollView(
+          top: Space.xxxl,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

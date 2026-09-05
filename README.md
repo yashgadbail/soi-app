@@ -13,7 +13,7 @@ countersigns it. Every design decision defends that.
 | App | Flutter 3.47 (Dart 3.13), Android. Package `org.swagofindia.soi` |
 | Backend | Postgres on Supabase: row-level security, every write through a server function |
 | Migrations | Plain SQL, versioned with dbmate (`db/migrations`) |
-| Docs | [docs/](docs/) — start with [ARCHITECTURE.md](docs/ARCHITECTURE.md) and [HANDOFF.md](docs/HANDOFF.md) |
+| Docs | [docs/](docs/) — start with [ARCHITECTURE.md](docs/ARCHITECTURE.md), [HANDOFF.md](docs/HANDOFF.md) and [SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) |
 
 ## Run it
 

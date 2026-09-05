@@ -195,7 +195,7 @@
 
   "passportTitle": "Impact Passport",
   "passportCertifiedHours": "Certified hours",
-  "passportPending": "Awaiting sign-off",
+  "passportPending": "Pending",
   "passportDrives": "Drives",
   "passportPledges": "Pledges",
   "passportLead": "Every certified hour was signed off by the organisation that ran the drive. That's what makes it worth putting on a form.",
@@ -561,5 +561,33 @@
   "errPledgeHasSignatures": "This pledge has signatures and can't be deleted. Close it instead.",
   "errBadStatus": "Not a valid status.",
   "errBadTarget": "Nothing to report.",
-  "errTooManyReports": "You've sent a lot of reports today. Try again tomorrow."
+  "errTooManyReports": "You've sent a lot of reports today. Try again tomorrow.",
+
+  "dialogKeepSpot": "Keep my spot",
+  "dialogKeepDrive": "Keep the drive",
+  "dialogKeepEditing": "Keep editing",
+  "dialogStaySignedIn": "Stay signed in",
+  "dialogKeepAccount": "Keep my account",
+  "dialogNotYet": "Not yet",
+  "dialogKeepIt": "Keep it",
+  "dialogGoBack": "Go back",
+  "dialogKeepPledge": "Keep the pledge",
+  "dialogStay": "Stay",
+  "dialogKeepMember": "Keep them",
+  "discoverEmptyLead": "Drives appear here the moment an organisation publishes one. Here is how it works in the meantime.",
+  "discoverEmptyOrgTitle": "Run an NGO, school or company?",
+  "discoverEmptyOrgBody": "Register it in a minute and publish your first drive today.",
+  "discoverEmptyOrgCta": "Register an organisation",
+  "discoverEmptySignInBody": "Create a free account so you are ready the moment a drive goes live.",
+  "passportMilestoneTitle": "Next milestone",
+  "passportMilestoneBody": "{remaining} more certified {remaining, plural, =1{hour} other{hours}} to reach {target}",
+  "@passportMilestoneBody": {"placeholders":{"remaining":{"type":"num","format":"compact"},"target":{"type":"num","format":"compact"}}},
+  "passportMilestoneReached": "You have passed {target} certified hours. That is worth putting on a form.",
+  "@passportMilestoneReached": {"placeholders":{"target":{"type":"num","format":"compact"}}},
+  "passportMilestoneFirst": "Your first certified hour is the hardest one. Find a drive and turn up.",
+
+  "passportStartTitle": "Your Passport starts with one drive",
+  "passportStartBody": "Turn up, scan the coordinator's QR code, and your certified hours appear here.",
+  "passportStartCta": "Find a drive",
+  "passportNextDrive": "Your next drive"
 }

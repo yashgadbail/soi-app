@@ -68,6 +68,41 @@ Inter, static instances 400/500/600/700/800 bundled (OFL).
 - `showSnack` (+ optional action), `confirmDialog` (destructive style),
   `showSoiSheet`, `copyToClipboard`.
 
+## Surfaces and chrome
+
+- **Glass chrome, solid content.** The tab bar, every detail-page app bar
+  (`GlassAppBar`), the Discover title bar and the bottom action bars
+  (`GlassActionBar`) are frosted (`GlassSurface`: 18 px blur over a 78%
+  surface tint with a hairline). Content always scrolls *under* them
+  (`extendBody` / `extendBodyBehindAppBar` + `pageInsets`), because a blur
+  with nothing behind it is just a grey band. Cards and sheets stay opaque.
+- **Transparent system bars.** Status and navigation bars are transparent
+  with no contrast scrim; icon brightness follows the theme, and screens on
+  the deep-green hero switch to light icons (`SoiTheme.systemBarsOnDark`).
+- **Brand backdrop.** Every page is transparent over one shared ground
+  (`BrandBackdrop`): the page colour with a green bloom top-left, a saffron
+  bloom top-right and a faint green bloom low-left. It gives the frosted bars
+  colour to blur and keeps the app from reading as a grey form. Page
+  transitions crossfade on both platforms because pages are transparent.
+- **Cause colours.** Each cause has an icon and a colour (`causeStyle`):
+  Environment green, Education indigo, Health rose, Community saffron,
+  Animal welfare amber, Disaster relief red; anything else gets the brand
+  mid-green with a volunteering icon. Used as the leading tile on drive
+  cards and on the publish form chips, so children and parents can scan by
+  colour before reading.
+- **Gradient tiles.** On hero gradients, stats sit in a no-blur white 10%
+  tile with an 18% hairline (`GradientGlassTile`); it reads as glass at no
+  GPU cost.
+- **Adaptive.** Windows wider than 720 dp get a navigation rail instead of
+  the tab bar; wider than 960 dp the whole app is centred in a 960 dp column.
+  Orientation is not locked (foldables and tablets letterbox otherwise).
+- **Zero states show no zeros.** A screen with nothing to count shows one
+  card that says what to do next (Passport, Discover), never a hero of 0s.
+- **Dialogs name the safe choice.** The dismiss button says "Keep my spot"
+  or "Stay signed in", never "Cancel", because the confirming action is
+  often itself a cancellation. Buttons are compact and stack with the safe
+  choice last when they cannot share a row.
+
 ## Feedback rules
 
 - Success → snackbar. Reversible success → snackbar with Undo.

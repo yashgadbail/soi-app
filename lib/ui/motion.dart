@@ -72,11 +72,12 @@ class CountUp extends StatelessWidget {
   }
 }
 
-/// Subtle scale on press for cards that navigate.
+/// Subtle scale while pressed. Purely visual: it listens to raw pointer
+/// events and never handles the tap itself, so it can wrap a card that owns
+/// its own InkWell without firing the action twice.
 class PressScale extends StatefulWidget {
-  const PressScale({required this.child, required this.onTap, super.key});
+  const PressScale({required this.child, super.key});
   final Widget child;
-  final VoidCallback onTap;
 
   @override
   State<PressScale> createState() => _PressScaleState();
@@ -87,11 +88,10 @@ class _PressScaleState extends State<PressScale> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _down = true),
-      onTapUp: (_) => setState(() => _down = false),
-      onTapCancel: () => setState(() => _down = false),
-      onTap: widget.onTap,
+    return Listener(
+      onPointerDown: (_) => setState(() => _down = true),
+      onPointerUp: (_) => setState(() => _down = false),
+      onPointerCancel: (_) => setState(() => _down = false),
       child: AnimatedScale(
         scale: _down ? 0.985 : 1,
         duration: Motion.fast,

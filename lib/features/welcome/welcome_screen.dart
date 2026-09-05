@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:soi/core/theme/theme.dart';
 import 'package:soi/core/theme/tokens.dart';
 import 'package:soi/core/utils/format.dart';
 import 'package:soi/core/utils/validators.dart';
@@ -11,6 +13,8 @@ import 'package:soi/data/repositories.dart';
 import 'package:soi/data/session.dart';
 import 'package:soi/l10n/generated/app_localizations.dart';
 import 'package:soi/router/routes.dart';
+import 'package:soi/ui/effects.dart';
+import 'package:soi/ui/how_it_works.dart';
 import 'package:soi/ui/motion.dart';
 import 'package:soi/ui/widgets.dart';
 
@@ -70,21 +74,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final drives = ref.watch(welcomeDrivesProvider);
 
     return Scaffold(
-      body: CustomScrollView(
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SoiTheme.systemBarsOnDark,
+        child: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: _Hero(
-              stats: stats.value,
-              onBrowse: _browse,
-              onSignIn: _signIn,
-            ),
-          ),
+          SliverToBoxAdapter(child: _Hero(stats: stats.value, onBrowse: _browse, onSignIn: _signIn)),
           SliverPadding(
-            padding: pagePadding.copyWith(top: Space.xxl),
+            padding: pageInsets(context).copyWith(top: Space.section),
             sliver: SliverList.list(
               children: [
-                FadeInUp(child: _Steps()),
-                const SizedBox(height: Space.xxl),
+                const FadeInUp(child: HowItWorks()),
+                const SizedBox(height: Space.section),
                 FadeInUp(
                   index: 1,
                   child: SectionLabel(
@@ -93,7 +93,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   ),
                 ),
                 ...drives.when(
-                  loading: () => [const _DriveSkeleton(), const _DriveSkeleton()],
+                  loading: () => [
+                    const Shimmer(child: Column(children: [SkeletonCard(lines: 2), SkeletonCard(lines: 2)])),
+                  ],
                   error: (_, _) => const [SizedBox.shrink()],
                   data: (rows) => [
                     for (final (i, d) in rows.indexed)
@@ -101,59 +103,42 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         index: i + 2,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: Space.md),
-                          child: SoiCard(
-                            onTap: () => DriveRoute(id: d.id).push<void>(context),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 52,
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: c.greenSoft,
-                                    borderRadius: BorderRadius.circular(Radii.md),
+                          child: PressScale(
+                            child: SoiCard(
+                              onTap: () => DriveRoute(id: d.id).push<void>(context),
+                              padding: const EdgeInsets.all(Space.lg),
+                              child: Row(
+                                children: [
+                                  _DateBadge(d.startsAt),
+                                  const SizedBox(width: Space.lg),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(d.title, style: context.text.titleMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          [d.orgName, if (d.city != null) d.city!].join(' · '),
+                                          style: context.text.bodySmall,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        Fmt.day(d.startsAt).split(', ').last.split(' ').first,
-                                        style: context.text.titleLarge!.copyWith(color: c.greenDark),
-                                      ),
-                                      Text(
-                                        Fmt.day(d.startsAt).split(' ').last.toUpperCase(),
-                                        style: context.text.labelSmall!.copyWith(color: c.greenDark),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: Space.md),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(d.title, style: context.text.titleMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        [d.orgName, if (d.city != null) d.city!].join(' · '),
-                                        style: context.text.bodySmall,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: Space.sm),
-                                Text(l.commonHoursShort(Fmt.hours(d.defaultHours)),
-                                    style: context.text.labelLarge!.copyWith(color: c.green)),
-                              ],
+                                  const SizedBox(width: Space.sm),
+                                  Text(l.commonHoursShort(Fmt.hours(d.defaultHours)),
+                                      style: context.text.labelLarge!.copyWith(color: c.green)),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    if (rows.isEmpty)
-                      Text(l.discoverEmptyTitle, style: context.text.bodyMedium),
+                    if (rows.isEmpty) Text(l.discoverEmptyTitle, style: context.text.bodyMedium),
                   ],
                 ),
-                const SizedBox(height: Space.xxl),
+                const SizedBox(height: Space.section),
                 FadeInUp(
                   index: 5,
                   child: SoiCard(
@@ -162,8 +147,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l.welcomeHavePledgeCode,
-                            style: context.text.titleMedium!.copyWith(color: c.saffronInk)),
+                        Text(l.welcomeHavePledgeCode, style: context.text.titleMedium!.copyWith(color: c.saffronInk)),
                         const SizedBox(height: Space.md),
                         Row(
                           children: [
@@ -196,6 +180,29 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             ),
           ),
         ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DateBadge extends StatelessWidget {
+  const _DateBadge(this.when);
+  final DateTime when;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.soi;
+    final parts = Fmt.day(when).split(', ').last.split(' ');
+    return Container(
+      width: 56,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(color: c.greenSoft, borderRadius: BorderRadius.circular(Radii.md)),
+      child: Column(
+        children: [
+          Text(parts.first, style: context.text.titleLarge!.copyWith(color: c.greenDark)),
+          Text(parts.last.toUpperCase(), style: context.text.labelSmall!.copyWith(color: c.greenDark)),
+        ],
       ),
     );
   }
@@ -212,13 +219,14 @@ class _Hero extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final top = MediaQuery.paddingOf(context).top;
     return Container(
-      padding: EdgeInsets.fromLTRB(Space.page, top + Space.xxl, Space.page, Space.xxl),
+      padding: EdgeInsets.fromLTRB(Space.page, top + Space.xxl, Space.page, Space.xxxl),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFF0A5C43), SoiColors.deep],
         ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(Radii.xl + 8)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,35 +235,33 @@ class _Hero extends StatelessWidget {
             children: [
               Text(
                 l.brandShort,
-                style: context.text.titleLarge!.copyWith(
-                  color: SoiColors.certSaffron,
-                  letterSpacing: 3,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: context.text.titleLarge!.copyWith(color: SoiColors.certSaffron, letterSpacing: 3, fontWeight: FontWeight.w800),
               ),
               const SizedBox(width: Space.sm),
               Text(l.appName, style: context.text.labelMedium!.copyWith(color: Colors.white70)),
             ],
           ),
-          const SizedBox(height: Space.xxl),
+          const SizedBox(height: Space.section),
           Text(l.welcomeTagline, style: context.text.displaySmall!.copyWith(color: Colors.white)),
           const SizedBox(height: Space.md),
           Text(l.welcomeLead, style: context.text.bodyLarge!.copyWith(color: Colors.white.withValues(alpha: 0.8))),
-          const SizedBox(height: Space.xxl),
-          Row(
-            children: [
-              Expanded(child: StatTile(value: _n(stats?.organisations), label: l.welcomeStatOrganisations, onDark: true)),
-              Expanded(child: StatTile(value: _n(stats?.drives), label: l.welcomeStatDrives, onDark: true)),
-              Expanded(child: StatTile(value: _n(stats?.certifiedHours), label: l.welcomeStatHours, onDark: true)),
-            ],
+          const SizedBox(height: Space.section),
+          GradientGlassTile(
+            child: Row(
+              children: [
+                Expanded(child: StatTile(value: _n(stats?.organisations), label: l.welcomeStatOrganisations, onDark: true)),
+                Expanded(child: StatTile(value: _n(stats?.drives), label: l.welcomeStatDrives, onDark: true)),
+                Expanded(child: StatTile(value: _n(stats?.certifiedHours), label: l.welcomeStatHours, onDark: true)),
+              ],
+            ),
           ),
-          const SizedBox(height: Space.xxl),
+          const SizedBox(height: Space.section),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: SoiColors.certSaffron, foregroundColor: const Color(0xFF3A2000)),
             onPressed: onBrowse,
             child: Text(l.welcomeCtaBrowse),
           ),
-          const SizedBox(height: Space.sm),
+          const SizedBox(height: Space.md),
           OutlinedButton(
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
@@ -264,7 +270,7 @@ class _Hero extends StatelessWidget {
             onPressed: onSignIn,
             child: Text(l.welcomeCtaSignIn),
           ),
-          const SizedBox(height: Space.md),
+          const SizedBox(height: Space.lg),
           Text(l.welcomeFree, style: context.text.bodySmall!.copyWith(color: Colors.white60)),
         ],
       ),
@@ -272,63 +278,4 @@ class _Hero extends StatelessWidget {
   }
 
   String _n(num? v) => v == null ? '—' : Fmt.hours(v);
-}
-
-class _Steps extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final c = context.soi;
-    final steps = [
-      (Icons.event_available_outlined, l.welcomeStep1Title, l.welcomeStep1Body),
-      (Icons.qr_code_scanner, l.welcomeStep2Title, l.welcomeStep2Body),
-      (Icons.verified_outlined, l.welcomeStep3Title, l.welcomeStep3Body),
-    ];
-    return SoiCard(
-      child: Column(
-        children: [
-          for (final (i, s) in steps.indexed) ...[
-            if (i > 0) const Divider(height: Space.xl),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(color: c.greenSoft, borderRadius: BorderRadius.circular(Radii.md)),
-                  child: Icon(s.$1, color: c.greenDark, size: 22),
-                ),
-                const SizedBox(width: Space.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(s.$2, style: context.text.titleSmall),
-                      const SizedBox(height: 2),
-                      Text(s.$3, style: context.text.bodySmall),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _DriveSkeleton extends StatelessWidget {
-  const _DriveSkeleton();
-  @override
-  Widget build(BuildContext context) {
-    final c = context.soi;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Space.md),
-      child: Container(
-        height: 76,
-        decoration: BoxDecoration(color: c.bg, borderRadius: BorderRadius.circular(Radii.xl), border: Border.all(color: c.line)),
-      ),
-    );
-  }
 }

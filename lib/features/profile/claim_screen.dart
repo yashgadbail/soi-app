@@ -55,9 +55,9 @@ class _ClaimScreenState extends ConsumerState<ClaimScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l.claimTitle)),
-      body: ListView(
-        padding: pagePadding,
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(l.claimTitle)),
+      body: PageListView(
         children: [
           Text(l.claimLead, style: context.text.bodyLarge),
           const SizedBox(height: Space.xl),

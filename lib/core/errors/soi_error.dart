@@ -33,27 +33,6 @@ enum SoiErrorKind {
 class SoiError implements Exception {
   const SoiError(this.key, this.kind, {this.raw});
 
-  /// UPPER_SNAKE key from the server, or a synthetic one (`OFFLINE`,
-  /// `UNKNOWN`, `NOT_FOUND`).
-  final String key;
-  final SoiErrorKind kind;
-
-  /// The original message, for logs only.
-  final String? raw;
-
-  static final _keyPattern = RegExp(r'\b([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+)\b');
-
-  static const _notFoundKeys = {
-    'DRIVE_NOT_FOUND',
-    'ORG_NOT_FOUND',
-    'PLEDGE_NOT_FOUND',
-    'CERTIFICATE_NOT_FOUND',
-    'STUDENT_NOT_FOUND',
-    'MEMBER_NOT_FOUND',
-    'INVITE_NOT_FOUND',
-    'INVALID_CLAIM_CODE',
-  };
-
   /// Normalises anything thrown by the data layer.
   factory SoiError.from(Object error) {
     if (error is SoiError) return error;
@@ -108,6 +87,28 @@ class SoiError implements Exception {
     }
     return SoiError('UNKNOWN', SoiErrorKind.unknown, raw: text);
   }
+
+  /// UPPER_SNAKE key from the server, or a synthetic one (`OFFLINE`,
+  /// `UNKNOWN`, `NOT_FOUND`).
+  final String key;
+  final SoiErrorKind kind;
+
+  /// The original message, for logs only.
+  final String? raw;
+
+  static final _keyPattern = RegExp(r'\b([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+)\b');
+
+  static const _notFoundKeys = {
+    'DRIVE_NOT_FOUND',
+    'ORG_NOT_FOUND',
+    'PLEDGE_NOT_FOUND',
+    'CERTIFICATE_NOT_FOUND',
+    'STUDENT_NOT_FOUND',
+    'MEMBER_NOT_FOUND',
+    'INVITE_NOT_FOUND',
+    'INVALID_CLAIM_CODE',
+  };
+
 
   static SoiErrorKind _kindFor(String key) {
     if (key == 'NOT_SIGNED_IN') return SoiErrorKind.notSignedIn;

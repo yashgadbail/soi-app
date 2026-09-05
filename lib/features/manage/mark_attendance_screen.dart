@@ -49,7 +49,7 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
 
   Future<void> _submit(String driveTitle) async {
     final l = AppLocalizations.of(context);
-    final ok = await confirmDialog(context, title: l.markConfirmTitle(_picked.length), body: l.markConfirmBody(driveTitle), confirmLabel: l.commonContinue);
+    final ok = await confirmDialog(context, title: l.markConfirmTitle(_picked.length), body: l.markConfirmBody(driveTitle), confirmLabel: l.commonContinue, cancelLabel: l.dialogGoBack, icon: Icons.checklist);
     if (!ok) return;
     setState(() => _busy = true);
     try {
@@ -76,7 +76,8 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
     final title = drive.value?.title ?? '';
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.markTitle)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(l.markTitle)),
       floatingActionButton: _picked.isEmpty
           ? null
           : FloatingActionButton.extended(
@@ -95,10 +96,10 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
           if (d.students.isEmpty) {
             return EmptyView(icon: Icons.groups_outlined, title: l.rosterEmptyTitle, body: l.rosterEmptyBody);
           }
-          return CustomScrollView(
+          return PageInsets(builder: (context, insets) => CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: pagePadding.copyWith(bottom: 0),
+                padding: insets.copyWith(bottom: 0),
                 sliver: SliverList.list(
                   children: [
                     Text(title, style: context.text.titleLarge),
@@ -167,7 +168,7 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
                 ),
               ),
             ],
-          );
+          ));
         },
       ),
     );

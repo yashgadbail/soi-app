@@ -51,9 +51,9 @@ class _NameEditScreenState extends ConsumerState<NameEditScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l.profileEditName)),
-      body: ListView(
-        padding: pagePadding,
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(l.profileEditName)),
+      body: PageListView(
         children: [
           Text(l.onboardNameLead, style: context.text.bodyMedium),
           const SizedBox(height: Space.xl),

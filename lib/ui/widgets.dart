@@ -4,6 +4,7 @@ import 'package:soi/core/errors/error_messages.dart';
 import 'package:soi/core/errors/soi_error.dart';
 import 'package:soi/core/theme/tokens.dart';
 import 'package:soi/l10n/generated/app_localizations.dart';
+import 'package:soi/ui/effects.dart';
 
 /// Shared building blocks. Screens compose these; they do not restyle them.
 
@@ -12,7 +13,7 @@ class SoiCard extends StatelessWidget {
     required this.child,
     super.key,
     this.onTap,
-    this.padding = const EdgeInsets.all(Space.lg),
+    this.padding = const EdgeInsets.all(Space.xl),
     this.color,
     this.borderColor,
     this.semanticsLabel,
@@ -314,24 +315,53 @@ void showErrorSnack(BuildContext context, Object error) {
 }
 
 /// Confirmation dialog for irreversible actions. Returns true when confirmed.
+///
+/// The dismiss button must describe *staying* ("Keep my spot", "Stay signed
+/// in"), never "Cancel", because the confirming action is often itself a
+/// cancellation. Both buttons are compact and side by side; if the labels
+/// do not fit on one row the dialog stacks them with the safe choice last.
 Future<bool> confirmDialog(
   BuildContext context, {
   required String title,
   required String body,
   required String confirmLabel,
+  String? cancelLabel,
   bool destructive = false,
+  IconData? icon,
 }) async {
   final l = AppLocalizations.of(context);
   final c = context.soi;
+  const compact = ButtonStyle(
+    minimumSize: WidgetStatePropertyAll(Size(0, 44)),
+    padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: Space.lg)),
+    tapTargetSize: MaterialTapTargetSize.padded,
+  );
   final result = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
+      icon: icon == null
+          ? null
+          : Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(color: destructive ? c.dangerSoft : c.greenSoft, shape: BoxShape.circle),
+              child: Icon(icon, color: destructive ? c.danger : c.greenDark),
+            ),
       title: Text(title),
       content: Text(body),
+      actionsAlignment: MainAxisAlignment.end,
+      actionsOverflowDirection: VerticalDirection.up,
+      actionsOverflowButtonSpacing: Space.sm,
       actions: [
-        TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(l.commonCancel)),
+        TextButton(
+          style: compact.copyWith(foregroundColor: WidgetStatePropertyAll(c.body)),
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(cancelLabel ?? l.commonNotNow),
+        ),
         FilledButton(
-          style: destructive ? FilledButton.styleFrom(backgroundColor: c.danger) : null,
+          style: compact.copyWith(
+            backgroundColor: destructive ? WidgetStatePropertyAll(c.danger) : null,
+          ),
           onPressed: () => Navigator.of(ctx).pop(true),
           child: Text(confirmLabel),
         ),
@@ -370,4 +400,170 @@ String? fieldError(BuildContext context, String? key) =>
     key == null ? null : errorMessage(AppLocalizations.of(context), key);
 
 /// Page-level padding used by every list/scroll view.
-const pagePadding = EdgeInsets.fromLTRB(Space.page, Space.sm, Space.page, 40);
+const pagePadding = EdgeInsets.fromLTRB(Space.page, Space.md, Space.page, 48);
+
+/// Page padding that also clears the frosted app bar above and the tab bar
+/// or gesture area below. Content scrolls *under* both bars (the blur needs
+/// something behind it), so lists must start and end clear of them.
+///
+/// The [context] must be *inside* the Scaffold body: that is where the
+/// Scaffold publishes the bar heights as MediaQuery padding. Prefer
+/// [PageListView] / [PageScrollView] / [PageInsets], which guarantee it.
+EdgeInsets pageInsets(BuildContext context, {double? top, double extraBottom = 0}) {
+  final mq = MediaQuery.paddingOf(context);
+  return EdgeInsets.fromLTRB(
+    Space.page,
+    top ?? mq.top + Space.md,
+    Space.page,
+    mq.bottom + Space.xxxl + extraBottom,
+  );
+}
+
+/// A ListView with the page insets measured from inside the body.
+class PageListView extends StatelessWidget {
+  const PageListView({required this.children, super.key, this.top, this.extraBottom = 0, this.controller});
+  final List<Widget> children;
+  final double? top;
+  final double extraBottom;
+  final ScrollController? controller;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+        controller: controller,
+        padding: pageInsets(context, top: top, extraBottom: extraBottom),
+        children: children,
+      );
+}
+
+/// A SingleChildScrollView with the page insets measured from inside the body.
+class PageScrollView extends StatelessWidget {
+  const PageScrollView({required this.child, super.key, this.top, this.extraBottom = 0});
+  final Widget child;
+  final double? top;
+  final double extraBottom;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+        padding: pageInsets(context, top: top, extraBottom: extraBottom),
+        child: child,
+      );
+}
+
+/// Hands a sliver-based body the correct insets.
+class PageInsets extends StatelessWidget {
+  const PageInsets({required this.builder, super.key});
+  final Widget Function(BuildContext context, EdgeInsets insets) builder;
+
+  @override
+  Widget build(BuildContext context) => builder(context, pageInsets(context));
+}
+
+/// The page ground: the brand colours as two soft light blooms, so frosted
+/// bars have colour to blur and the app never feels like a grey form. Painted
+/// once behind every route (see `SoiApp`); scaffolds are transparent.
+class BrandBackdrop extends StatelessWidget {
+  const BrandBackdrop({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.soi;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return RepaintBoundary(
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: c.bgAlt),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -120,
+              left: -80,
+              child: _Bloom(color: c.green.withValues(alpha: dark ? 0.22 : 0.16), size: 380),
+            ),
+            Positioned(
+              top: -40,
+              right: -140,
+              child: _Bloom(color: c.saffron.withValues(alpha: dark ? 0.16 : 0.18), size: 360),
+            ),
+            Positioned(
+              bottom: -160,
+              left: 40,
+              child: _Bloom(color: c.green.withValues(alpha: dark ? 0.12 : 0.08), size: 420),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Bloom extends StatelessWidget {
+  const _Bloom({required this.color, required this.size});
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)], stops: const [0.1, 1]),
+        ),
+      ),
+    );
+  }
+}
+
+/// A translucent, blurred app bar. Pair with `extendBodyBehindAppBar: true`
+/// and [pageInsets] so the page scrolls beneath it.
+class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const GlassAppBar({super.key, this.title, this.actions, this.leading, this.centerTitle, this.bottom});
+  final Widget? title;
+  final List<Widget>? actions;
+  final Widget? leading;
+  final bool? centerTitle;
+  final PreferredSizeWidget? bottom;
+
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.soi;
+    return AppBar(
+      title: title,
+      actions: actions,
+      leading: leading,
+      centerTitle: centerTitle,
+      bottom: bottom,
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      shape: Border(bottom: BorderSide(color: c.line.withValues(alpha: 0.6), width: 0.5)),
+      flexibleSpace: const GlassSurface(border: false, child: SizedBox.expand()),
+    );
+  }
+}
+
+/// A frosted bottom action bar for detail pages (Register, Take this pledge).
+/// Use as `Scaffold.bottomNavigationBar` with `extendBody: true`.
+class GlassActionBar extends StatelessWidget {
+  const GlassActionBar({required this.child, super.key});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassSurface(
+      border: false,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(Space.page, Space.md, Space.page, Space.md),
+          child: child,
+        ),
+      ),
+    );
+  }
+}

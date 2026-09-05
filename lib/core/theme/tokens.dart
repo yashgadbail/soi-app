@@ -51,7 +51,7 @@ class SoiColors extends ThemeExtension<SoiColors> {
     muted: Color(0xFF8794A3),
     line: Color(0xFFDDE5EC),
     bg: Color(0xFFFFFFFF),
-    bgAlt: Color(0xFFEEF3F6),
+    bgAlt: Color(0xFFF3F6F8),
     danger: Color(0xFFC0392B),
     dangerSoft: Color(0xFFFDEDEC),
     success: Color(0xFF12946C),
@@ -184,7 +184,10 @@ abstract final class Space {
   static const double xxxl = 32;
 
   /// Horizontal page padding.
-  static const double page = 18;
+  static const double page = 20;
+
+  /// Vertical rhythm between sections of a screen.
+  static const double section = 28;
 
   /// Minimum touch target. 48dp is the Android accessibility floor, and it
   /// matters more than usual here: many users are students on cheap phones.

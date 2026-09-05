@@ -34,7 +34,7 @@ void main() {
   });
 
   testWidgets('a rule error shows the mapped sentence, not raw text', (tester) async {
-    await tester.pumpWidget(host(ErrorView(error: const PostgrestException(message: 'P0001: DRIVE_FULL'))));
+    await tester.pumpWidget(host(const ErrorView(error: PostgrestException(message: 'P0001: DRIVE_FULL'))));
     expect(find.text('This drive is full.'), findsOneWidget);
     expect(find.textContaining('P0001'), findsNothing);
   });

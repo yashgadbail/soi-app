@@ -20,7 +20,8 @@ import 'package:url_launcher/url_launcher.dart';
 part 'drive_screen.g.dart';
 
 @riverpod
-Future<DriveDetail> driveDetail(Ref ref, String id) => ref.watch(drivesRepoProvider).detail(id);
+Future<DriveDetail> driveDetail(Ref ref, String id) =>
+    ref.watch(drivesRepoProvider).detail(id);
 
 /// Public drive page. Register / un-register, directions, share, report;
 /// coordinators get Edit and Coordinator Mode.
@@ -39,7 +40,9 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
     final l = AppLocalizations.of(context);
     final session = ref.read(sessionControllerProvider);
     if (!session.isSignedIn) {
-      unawaited(SignInRoute(from: DriveRoute(id: d.id).location).push<void>(context));
+      unawaited(
+        SignInRoute(from: DriveRoute(id: d.id).location).push<void>(context),
+      );
       return;
     }
     if (d.registered) {
@@ -48,17 +51,28 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
         title: l.driveCancelConfirmTitle,
         body: l.driveCancelConfirmBody,
         confirmLabel: l.driveCancelRegistration,
+        cancelLabel: l.dialogKeepSpot,
         destructive: true,
+        icon: Icons.event_busy_outlined,
       );
       if (!ok) return;
     }
     setState(() => _busy = true);
     try {
       final repo = ref.read(drivesRepoProvider);
-      final spots = d.registered ? await repo.cancelRegistration(d.id) : await repo.register(d.id);
-      ref.read(discoverControllerProvider.notifier).patchRegistration(d.id, registered: !d.registered, spotsLeft: spots);
+      final spots = d.registered
+          ? await repo.cancelRegistration(d.id)
+          : await repo.register(d.id);
+      ref
+          .read(discoverControllerProvider.notifier)
+          .patchRegistration(d.id, registered: !d.registered, spotsLeft: spots);
       ref.invalidate(driveDetailProvider(d.id));
-      if (mounted) showSnack(context, d.registered ? l.driveCancelledSnack : l.driveRegisteredSnack);
+      if (mounted) {
+        showSnack(
+          context,
+          d.registered ? l.driveCancelledSnack : l.driveRegisteredSnack,
+        );
+      }
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
     } finally {
@@ -69,9 +83,16 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
   Future<void> _share(DriveDetail d) async {
     final l = AppLocalizations.of(context);
     final when = '${Fmt.day(d.startsAt)}, ${Fmt.time(d.startsAt)}';
-    await SharePlus.instance.share(ShareParams(
-      text: l.driveShareText(d.title, d.org.name, when, Links.driveDeepLink(d.id).toString()),
-    ));
+    await SharePlus.instance.share(
+      ShareParams(
+        text: l.driveShareText(
+          d.title,
+          d.org.name,
+          when,
+          Links.driveDeepLink(d.id).toString(),
+        ),
+      ),
+    );
   }
 
   Future<void> _directions(DriveDetail d) async {
@@ -79,15 +100,19 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
     if (q.isEmpty) return;
     final uri = Links.mapsSearch(q);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      await launchUrl(Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': q}),
-          mode: LaunchMode.externalApplication);
+      await launchUrl(
+        Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': q}),
+        mode: LaunchMode.externalApplication,
+      );
     }
   }
 
   Future<void> _report(DriveDetail d) async {
     final l = AppLocalizations.of(context);
     if (!ref.read(sessionControllerProvider).isSignedIn) {
-      unawaited(SignInRoute(from: DriveRoute(id: d.id).location).push<void>(context));
+      unawaited(
+        SignInRoute(from: DriveRoute(id: d.id).location).push<void>(context),
+      );
       return;
     }
     final reason = await showSoiSheet<String>(
@@ -98,7 +123,11 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
         children: [
           Text(l.driveReportTitle, style: ctx.text.titleLarge),
           const SizedBox(height: Space.md),
-          for (final r in [l.driveReportReason1, l.driveReportReason2, l.driveReportReason3])
+          for (final r in [
+            l.driveReportReason1,
+            l.driveReportReason2,
+            l.driveReportReason3,
+          ])
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(r),
@@ -110,11 +139,42 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
     );
     if (reason == null || !mounted) return;
     try {
-      await ref.read(accountRepoProvider).report(targetType: 'drive', targetId: d.id, reason: reason);
+      await ref
+          .read(accountRepoProvider)
+          .report(targetType: 'drive', targetId: d.id, reason: reason);
       if (mounted) showSnack(context, l.driveReportThanks);
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
     }
+  }
+
+  /// Register / registered, frosted, floating over the end of the list.
+  Widget? _actionBar(DriveDetail d) {
+    final l = AppLocalizations.of(context);
+    if (d.canManage && d.registered) return null;
+    return GlassActionBar(
+      child: d.registered
+          ? OutlinedButton.icon(
+              onPressed: _busy ? null : () => _toggleRegistration(d),
+              icon: const Icon(Icons.check_circle, size: 20),
+              label: Text(l.driveRegistered),
+            )
+          : FilledButton(
+              onPressed: _busy || !d.canRegister || d.isFull
+                  ? null
+                  : () => _toggleRegistration(d),
+              child: _busy
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(l.driveRegister),
+            ),
+    );
   }
 
   @override
@@ -123,7 +183,8 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
     final detail = ref.watch(driveDetailProvider(widget.id));
 
     return Scaffold(
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(l.driveTitle),
         actions: [
           detail.maybeWhen(
@@ -138,14 +199,20 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
       ),
       body: detail.when(
         loading: () => const LoadingView(),
-        error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(driveDetailProvider(widget.id))),
+        error: (e, _) => ErrorView(
+          error: e,
+          onRetry: () => ref.invalidate(driveDetailProvider(widget.id)),
+        ),
         data: (d) => _Body(
           drive: d,
-          busy: _busy,
-          onToggle: () => _toggleRegistration(d),
           onDirections: () => _directions(d),
           onReport: () => _report(d),
         ),
+      ),
+      extendBody: true,
+      bottomNavigationBar: detail.maybeWhen(
+        data: _actionBar,
+        orElse: () => null,
       ),
     );
   }
@@ -154,14 +221,10 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
 class _Body extends StatelessWidget {
   const _Body({
     required this.drive,
-    required this.busy,
-    required this.onToggle,
     required this.onDirections,
     required this.onReport,
   });
   final DriveDetail drive;
-  final bool busy;
-  final VoidCallback onToggle;
   final VoidCallback onDirections;
   final VoidCallback onReport;
 
@@ -189,144 +252,156 @@ class _Body extends StatelessWidget {
       bannerTone = TagTone.neutral;
     }
 
-    return Column(
+    return PageListView(
       children: [
-        Expanded(
-          child: ListView(
-            padding: pagePadding,
-            children: [
-              if (banner != null) ...[
-                Notice(banner, tone: bannerTone, icon: Icons.info_outline),
-                const SizedBox(height: Space.lg),
-              ],
-              if (att != null) ...[
-                Notice(
-                  att.status == 'certified' ? l.driveCheckedInCertified : l.driveCheckedInPending(d.org.name),
-                  tone: att.status == 'certified' ? TagTone.green : TagTone.saffron,
-                  icon: att.status == 'certified' ? Icons.verified_outlined : Icons.hourglass_top_rounded,
-                ),
-                const SizedBox(height: Space.lg),
-              ],
-              Row(
-                children: [
-                  SoiTag(Fmt.dayOrRelative(d.startsAt), tone: TagTone.green),
-                  const SizedBox(width: Space.sm),
-                  if (d.cause != null) SoiTag(d.cause!, tone: TagTone.saffron),
-                ],
-              ),
-              const SizedBox(height: Space.md),
-              Text(d.title, style: context.text.headlineMedium),
-              const SizedBox(height: Space.md),
-              InkWell(
-                borderRadius: BorderRadius.circular(Radii.md),
-                onTap: () => OrgRoute(id: d.org.id).push<void>(context),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Row(
+        if (banner != null) ...[
+          Notice(banner, tone: bannerTone, icon: Icons.info_outline),
+          const SizedBox(height: Space.lg),
+        ],
+        if (att != null) ...[
+          Notice(
+            att.status == 'certified'
+                ? l.driveCheckedInCertified
+                : l.driveCheckedInPending(d.org.name),
+            tone: att.status == 'certified' ? TagTone.green : TagTone.saffron,
+            icon: att.status == 'certified'
+                ? Icons.verified_outlined
+                : Icons.hourglass_top_rounded,
+          ),
+          const SizedBox(height: Space.lg),
+        ],
+        Row(
+          children: [
+            SoiTag(Fmt.dayOrRelative(d.startsAt), tone: TagTone.green),
+            const SizedBox(width: Space.sm),
+            if (d.cause != null) SoiTag(d.cause!, tone: TagTone.saffron),
+          ],
+        ),
+        const SizedBox(height: Space.md),
+        Text(d.title, style: context.text.headlineMedium),
+        const SizedBox(height: Space.md),
+        InkWell(
+          borderRadius: BorderRadius.circular(Radii.md),
+          onTap: () => OrgRoute(id: d.org.id).push<void>(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                InitialsAvatar(d.org.name, size: 34),
+                const SizedBox(width: Space.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      InitialsAvatar(d.org.name, size: 34),
-                      const SizedBox(width: Space.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(l.driveOrganiser, style: context.text.labelSmall),
-                            Row(
-                              children: [
-                                Flexible(child: Text(d.org.name, style: context.text.titleSmall, overflow: TextOverflow.ellipsis)),
-                                if (d.org.isVerified) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(Icons.verified, size: 16, color: c.greenMid, semanticLabel: l.discoverVerified),
-                                ],
-                              ],
+                      Text(l.driveOrganiser, style: context.text.labelSmall),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              d.org.name,
+                              style: context.text.titleSmall,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (d.org.isVerified) ...[
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.verified,
+                              size: 16,
+                              color: c.greenMid,
+                              semanticLabel: l.discoverVerified,
                             ),
                           ],
-                        ),
+                        ],
                       ),
-                      Icon(Icons.chevron_right_rounded, color: c.muted),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: Space.lg),
-              SoiCard(
-                padding: const EdgeInsets.symmetric(horizontal: Space.lg, vertical: Space.xs),
-                child: Column(
-                  children: [
-                    FactRow(icon: Icons.calendar_today_outlined, label: l.driveWhen,
-                        value: '${Fmt.day(d.startsAt)} · ${Fmt.timeRange(d.startsAt, d.endsAt)}'),
-                    const Divider(),
-                    FactRow(icon: Icons.place_outlined, label: l.driveWhere, value: where.isEmpty ? '—' : where,
-                        onTap: where.isEmpty ? null : onDirections),
-                    const Divider(),
-                    FactRow(icon: Icons.timer_outlined, label: l.driveHoursCredited, value: l.commonHours(d.defaultHours)),
-                    const Divider(),
-                    FactRow(icon: Icons.people_outline, label: l.driveSpots,
-                        value: '${l.discoverSpotsLeft(d.spotsLeft)} · ${d.capacity}'),
-                  ],
-                ),
-              ),
-              if (d.description != null && d.description!.trim().isNotEmpty) ...[
-                const SizedBox(height: Space.xl),
-                SectionLabel(l.driveAbout),
-                Text(d.description!, style: context.text.bodyLarge),
+                Icon(Icons.chevron_right_rounded, color: c.muted),
               ],
-              const SizedBox(height: Space.xl),
-              Notice(l.driveNothingCertifiedAuto, tone: TagTone.neutral, icon: Icons.verified_user_outlined),
-              const SizedBox(height: Space.lg),
-              if (d.canManage) ...[
-                SectionLabel(l.driveManage),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => DriveEditRoute(id: d.id).push<void>(context),
-                        icon: const Icon(Icons.edit_outlined),
-                        label: Text(l.commonEdit),
-                      ),
-                    ),
-                    const SizedBox(width: Space.sm),
-                    Expanded(
-                      child: FilledButton.tonalIcon(
-                        onPressed: () => CoordinatorRoute(id: d.id).push<void>(context),
-                        icon: const Icon(Icons.qr_code_2),
-                        label: Text(l.driveCoordinatorMode),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Space.lg),
-              ],
-              Center(
-                child: TextButton.icon(
-                  onPressed: onReport,
-                  style: TextButton.styleFrom(foregroundColor: c.muted),
-                  icon: const Icon(Icons.flag_outlined, size: 18),
-                  label: Text(l.driveReport),
-                ),
+            ),
+          ),
+        ),
+        const SizedBox(height: Space.lg),
+        SoiCard(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Space.lg,
+            vertical: Space.xs,
+          ),
+          child: Column(
+            children: [
+              FactRow(
+                icon: Icons.calendar_today_outlined,
+                label: l.driveWhen,
+                value:
+                    '${Fmt.day(d.startsAt)} · ${Fmt.timeRange(d.startsAt, d.endsAt)}',
+              ),
+              const Divider(),
+              FactRow(
+                icon: Icons.place_outlined,
+                label: l.driveWhere,
+                value: where.isEmpty ? '—' : where,
+                onTap: where.isEmpty ? null : onDirections,
+              ),
+              const Divider(),
+              FactRow(
+                icon: Icons.timer_outlined,
+                label: l.driveHoursCredited,
+                value: l.commonHours(d.defaultHours),
+              ),
+              const Divider(),
+              FactRow(
+                icon: Icons.people_outline,
+                label: l.driveSpots,
+                value: '${l.discoverSpotsLeft(d.spotsLeft)} · ${d.capacity}',
               ),
             ],
           ),
         ),
-        if (!d.canManage || !d.registered)
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(Space.page, Space.sm, Space.page, Space.md),
-              child: d.registered
-                  ? OutlinedButton.icon(
-                      onPressed: busy ? null : onToggle,
-                      icon: const Icon(Icons.check_circle, size: 20),
-                      label: Text(l.driveRegistered),
-                    )
-                  : FilledButton(
-                      onPressed: busy || !d.canRegister || d.isFull ? null : onToggle,
-                      child: busy
-                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                          : Text(l.driveRegister),
-                    ),
-            ),
+        if (d.description != null && d.description!.trim().isNotEmpty) ...[
+          const SizedBox(height: Space.xl),
+          SectionLabel(l.driveAbout),
+          Text(d.description!, style: context.text.bodyLarge),
+        ],
+        const SizedBox(height: Space.xl),
+        Notice(
+          l.driveNothingCertifiedAuto,
+          tone: TagTone.neutral,
+          icon: Icons.verified_user_outlined,
+        ),
+        const SizedBox(height: Space.lg),
+        if (d.canManage) ...[
+          SectionLabel(l.driveManage),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => DriveEditRoute(id: d.id).push<void>(context),
+                  icon: const Icon(Icons.edit_outlined),
+                  label: Text(l.commonEdit),
+                ),
+              ),
+              const SizedBox(width: Space.sm),
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: () =>
+                      CoordinatorRoute(id: d.id).push<void>(context),
+                  icon: const Icon(Icons.qr_code_2),
+                  label: Text(l.driveCoordinatorMode),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: Space.lg),
+        ],
+        Center(
+          child: TextButton.icon(
+            onPressed: onReport,
+            style: TextButton.styleFrom(foregroundColor: c.muted),
+            icon: const Icon(Icons.flag_outlined, size: 18),
+            label: Text(l.driveReport),
+          ),
+        ),
       ],
     );
   }

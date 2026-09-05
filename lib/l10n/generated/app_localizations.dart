@@ -1129,7 +1129,7 @@ abstract class AppLocalizations {
   /// No description provided for @passportPending.
   ///
   /// In en, this message translates to:
-  /// **'Awaiting sign-off'**
+  /// **'Pending'**
   String get passportPending;
 
   /// No description provided for @passportDrives.
@@ -3045,6 +3045,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve sent a lot of reports today. Try again tomorrow.'**
   String get errTooManyReports;
+
+  /// No description provided for @dialogKeepSpot.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my spot'**
+  String get dialogKeepSpot;
+
+  /// No description provided for @dialogKeepDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the drive'**
+  String get dialogKeepDrive;
+
+  /// No description provided for @dialogKeepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get dialogKeepEditing;
+
+  /// No description provided for @dialogStaySignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay signed in'**
+  String get dialogStaySignedIn;
+
+  /// No description provided for @dialogKeepAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my account'**
+  String get dialogKeepAccount;
+
+  /// No description provided for @dialogNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet'**
+  String get dialogNotYet;
+
+  /// No description provided for @dialogKeepIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get dialogKeepIt;
+
+  /// No description provided for @dialogGoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get dialogGoBack;
+
+  /// No description provided for @dialogKeepPledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the pledge'**
+  String get dialogKeepPledge;
+
+  /// No description provided for @dialogStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get dialogStay;
+
+  /// No description provided for @dialogKeepMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep them'**
+  String get dialogKeepMember;
+
+  /// No description provided for @discoverEmptyLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Drives appear here the moment an organisation publishes one. Here is how it works in the meantime.'**
+  String get discoverEmptyLead;
+
+  /// No description provided for @discoverEmptyOrgTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run an NGO, school or company?'**
+  String get discoverEmptyOrgTitle;
+
+  /// No description provided for @discoverEmptyOrgBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Register it in a minute and publish your first drive today.'**
+  String get discoverEmptyOrgBody;
+
+  /// No description provided for @discoverEmptyOrgCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Register an organisation'**
+  String get discoverEmptyOrgCta;
+
+  /// No description provided for @discoverEmptySignInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a free account so you are ready the moment a drive goes live.'**
+  String get discoverEmptySignInBody;
+
+  /// No description provided for @passportMilestoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next milestone'**
+  String get passportMilestoneTitle;
+
+  /// No description provided for @passportMilestoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} more certified {remaining, plural, =1{hour} other{hours}} to reach {target}'**
+  String passportMilestoneBody(num remaining, num target);
+
+  /// No description provided for @passportMilestoneReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You have passed {target} certified hours. That is worth putting on a form.'**
+  String passportMilestoneReached(num target);
+
+  /// No description provided for @passportMilestoneFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first certified hour is the hardest one. Find a drive and turn up.'**
+  String get passportMilestoneFirst;
+
+  /// No description provided for @passportStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Passport starts with one drive'**
+  String get passportStartTitle;
+
+  /// No description provided for @passportStartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn up, scan the coordinator\'s QR code, and your certified hours appear here.'**
+  String get passportStartBody;
+
+  /// No description provided for @passportStartCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a drive'**
+  String get passportStartCta;
+
+  /// No description provided for @passportNextDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next drive'**
+  String get passportNextDrive;
 }
 
 class _AppLocalizationsDelegate

@@ -594,7 +594,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passportCertifiedHours => 'Certified hours';
 
   @override
-  String get passportPending => 'Awaiting sign-off';
+  String get passportPending => 'Pending';
 
   @override
   String get passportDrives => 'Drives';
@@ -1717,4 +1717,105 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errTooManyReports =>
       'You\'ve sent a lot of reports today. Try again tomorrow.';
+
+  @override
+  String get dialogKeepSpot => 'Keep my spot';
+
+  @override
+  String get dialogKeepDrive => 'Keep the drive';
+
+  @override
+  String get dialogKeepEditing => 'Keep editing';
+
+  @override
+  String get dialogStaySignedIn => 'Stay signed in';
+
+  @override
+  String get dialogKeepAccount => 'Keep my account';
+
+  @override
+  String get dialogNotYet => 'Not yet';
+
+  @override
+  String get dialogKeepIt => 'Keep it';
+
+  @override
+  String get dialogGoBack => 'Go back';
+
+  @override
+  String get dialogKeepPledge => 'Keep the pledge';
+
+  @override
+  String get dialogStay => 'Stay';
+
+  @override
+  String get dialogKeepMember => 'Keep them';
+
+  @override
+  String get discoverEmptyLead =>
+      'Drives appear here the moment an organisation publishes one. Here is how it works in the meantime.';
+
+  @override
+  String get discoverEmptyOrgTitle => 'Run an NGO, school or company?';
+
+  @override
+  String get discoverEmptyOrgBody =>
+      'Register it in a minute and publish your first drive today.';
+
+  @override
+  String get discoverEmptyOrgCta => 'Register an organisation';
+
+  @override
+  String get discoverEmptySignInBody =>
+      'Create a free account so you are ready the moment a drive goes live.';
+
+  @override
+  String get passportMilestoneTitle => 'Next milestone';
+
+  @override
+  String passportMilestoneBody(num remaining, num target) {
+    final intl.NumberFormat remainingNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String remainingString = remainingNumberFormat.format(remaining);
+    final intl.NumberFormat targetNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String targetString = targetNumberFormat.format(target);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      remaining,
+      locale: localeName,
+      other: 'hours',
+      one: 'hour',
+    );
+    return '$remainingString more certified $_temp0 to reach $targetString';
+  }
+
+  @override
+  String passportMilestoneReached(num target) {
+    final intl.NumberFormat targetNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String targetString = targetNumberFormat.format(target);
+
+    return 'You have passed $targetString certified hours. That is worth putting on a form.';
+  }
+
+  @override
+  String get passportMilestoneFirst =>
+      'Your first certified hour is the hardest one. Find a drive and turn up.';
+
+  @override
+  String get passportStartTitle => 'Your Passport starts with one drive';
+
+  @override
+  String get passportStartBody =>
+      'Turn up, scan the coordinator\'s QR code, and your certified hours appear here.';
+
+  @override
+  String get passportStartCta => 'Find a drive';
+
+  @override
+  String get passportNextDrive => 'Your next drive';
 }

@@ -18,7 +18,7 @@ class ProfileScreen extends ConsumerWidget {
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
     final l = AppLocalizations.of(context);
-    final ok = await confirmDialog(context, title: l.profileSignOutConfirmTitle, body: l.profileSignOutConfirmBody, confirmLabel: l.commonSignOut);
+    final ok = await confirmDialog(context, title: l.profileSignOutConfirmTitle, body: l.profileSignOutConfirmBody, confirmLabel: l.commonSignOut, cancelLabel: l.dialogStaySignedIn, icon: Icons.logout);
     if (!ok || !context.mounted) return;
     try {
       await ref.read(authRepoProvider).signOut();
@@ -38,7 +38,9 @@ class ProfileScreen extends ConsumerWidget {
       title: l.profileDeleteConfirmTitle,
       body: l.profileDeleteConfirmBody,
       confirmLabel: l.profileDeleteConfirmAction,
+      cancelLabel: l.dialogKeepAccount,
       destructive: true,
+      icon: Icons.delete_forever_outlined,
     );
     if (!ok || !context.mounted) return;
     try {
@@ -63,7 +65,8 @@ class ProfileScreen extends ConsumerWidget {
 
     if (!s.isSignedIn) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.profileTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(l.profileTitle)),
         body: SignedOutView(
           icon: Icons.person_outline,
           onSignIn: () => const SignInRoute(from: '/profile').push<void>(context),
@@ -72,9 +75,10 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.profileTitle)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(l.profileTitle)),
       body: ListView(
-        padding: pagePadding,
+        padding: pageInsets(context).copyWith(bottom: MediaQuery.paddingOf(context).bottom + Space.xl),
         children: [
           SoiCard(
             onTap: () => const NameEditRoute().push<void>(context),

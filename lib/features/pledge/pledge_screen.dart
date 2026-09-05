@@ -40,7 +40,10 @@ class _PledgeScreenState extends ConsumerState<PledgeScreen> {
   Future<void> _sign(PledgeDetail p) async {
     final l = AppLocalizations.of(context);
     if (!ref.read(sessionControllerProvider).isSignedIn) {
-      unawaited(SignInRoute(from: PledgeRoute(code: p.shareCode).location).push<void>(context));
+      unawaited(
+        SignInRoute(from: PledgeRoute(code: p.shareCode).location)
+            .push<void>(context),
+      );
       return;
     }
     setState(() => _busy = true);
@@ -53,8 +56,14 @@ class _PledgeScreenState extends ConsumerState<PledgeScreen> {
       showSnack(
         context,
         l.pledgeSignedSnack,
-        actionLabel: r.certificateCode == null ? null : l.passportViewCertificate,
-        onAction: r.certificateCode == null ? null : () => CertificateRoute(code: r.certificateCode!).push<void>(context),
+        actionLabel: r.certificateCode == null
+            ? null
+            : l.passportViewCertificate,
+        onAction: r.certificateCode == null
+            ? null
+            : () =>
+                  CertificateRoute(code: r.certificateCode!)
+                      .push<void>(context),
       );
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
@@ -65,24 +74,62 @@ class _PledgeScreenState extends ConsumerState<PledgeScreen> {
 
   Future<void> _share(PledgeDetail p) async {
     final l = AppLocalizations.of(context);
-    await SharePlus.instance.share(ShareParams(
-      text: l.pledgeShareText(p.title, p.orgName, Links.pledgeDeepLink(p.shareCode).toString()),
-    ));
+    await SharePlus.instance.share(
+      ShareParams(
+        text: l.pledgeShareText(
+          p.title,
+          p.orgName,
+          Links.pledgeDeepLink(p.shareCode).toString(),
+        ),
+      ),
+    );
   }
 
   Future<void> _showQr(PledgeDetail p) => showSoiSheet<void>(
-        context,
-        builder: (ctx) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(p.title, style: ctx.text.titleLarge, textAlign: TextAlign.center),
-            const SizedBox(height: Space.lg),
-            QrView(QrPayload.pledge(p.shareCode), semanticsLabel: p.shareCode),
-            const SizedBox(height: Space.md),
-            SelectableText(p.shareCode, style: ctx.text.headlineSmall!.copyWith(letterSpacing: 4)),
-          ],
+    context,
+    builder: (ctx) => Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(p.title, style: ctx.text.titleLarge, textAlign: TextAlign.center),
+        const SizedBox(height: Space.lg),
+        QrView(QrPayload.pledge(p.shareCode), semanticsLabel: p.shareCode),
+        const SizedBox(height: Space.md),
+        SelectableText(
+          p.shareCode,
+          style: ctx.text.headlineSmall!.copyWith(letterSpacing: 4),
         ),
-      );
+      ],
+    ),
+  );
+
+  Widget? _actionBar(PledgeDetail p) {
+    final l = AppLocalizations.of(context);
+    final mine = p.mySignature;
+    if (mine != null && mine.certificateCode == null) return null;
+    return GlassActionBar(
+      child: mine != null
+          ? FilledButton.tonalIcon(
+              onPressed: () =>
+                  CertificateRoute(code: mine.certificateCode!)
+                      .push<void>(context),
+              icon: const Icon(Icons.workspace_premium_outlined),
+              label: Text(l.passportViewCertificate),
+            )
+          : FilledButton(
+              onPressed: _busy || !p.isActive ? null : () => _sign(p),
+              child: _busy
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(l.pledgeSign),
+            ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,14 +138,23 @@ class _PledgeScreenState extends ConsumerState<PledgeScreen> {
     final async = ref.watch(pledgeDetailProvider(widget.code));
 
     return Scaffold(
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(l.pledgeTitle),
         actions: [
           async.maybeWhen(
             data: (p) => Row(
               children: [
-                IconButton(tooltip: l.pledgeShowQr, icon: const Icon(Icons.qr_code_2), onPressed: () => _showQr(p)),
-                IconButton(tooltip: l.commonShare, icon: const Icon(Icons.share_outlined), onPressed: () => _share(p)),
+                IconButton(
+                  tooltip: l.pledgeShowQr,
+                  icon: const Icon(Icons.qr_code_2),
+                  onPressed: () => _showQr(p),
+                ),
+                IconButton(
+                  tooltip: l.commonShare,
+                  icon: const Icon(Icons.share_outlined),
+                  onPressed: () => _share(p),
+                ),
               ],
             ),
             orElse: () => const SizedBox.shrink(),
@@ -107,95 +163,104 @@ class _PledgeScreenState extends ConsumerState<PledgeScreen> {
       ),
       body: async.when(
         loading: () => const LoadingView(),
-        error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(pledgeDetailProvider(widget.code))),
+        error: (e, _) => ErrorView(
+          error: e,
+          onRetry: () => ref.invalidate(pledgeDetailProvider(widget.code)),
+        ),
         data: (p) {
           final mine = p.mySignature;
-          return Column(
+          return ListView(
+            padding: pageInsets(context),
             children: [
-              Expanded(
-                child: ListView(
-                  padding: pagePadding,
+              Row(
+                children: [
+                  if (p.campaign != null)
+                    SoiTag(p.campaign!, tone: TagTone.saffron),
+                  if (p.campaign != null) const SizedBox(width: Space.sm),
+                  if (!p.isActive) SoiTag(l.pledgesFilterClosed),
+                ],
+              ),
+              const SizedBox(height: Space.md),
+              Text(p.title, style: context.text.headlineMedium),
+              const SizedBox(height: Space.sm),
+              InkWell(
+                onTap: () => OrgRoute(id: p.orgId).push<void>(context),
+                borderRadius: BorderRadius.circular(Radii.sm),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        if (p.campaign != null) SoiTag(p.campaign!, tone: TagTone.saffron),
-                        if (p.campaign != null) const SizedBox(width: Space.sm),
-                        if (!p.isActive) SoiTag(l.pledgesFilterClosed),
-                      ],
-                    ),
-                    const SizedBox(height: Space.md),
-                    Text(p.title, style: context.text.headlineMedium),
-                    const SizedBox(height: Space.sm),
-                    InkWell(
-                      onTap: () => OrgRoute(id: p.orgId).push<void>(context),
-                      borderRadius: BorderRadius.circular(Radii.sm),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(l.pledgeBy(p.orgName), style: context.text.bodyMedium),
-                          if (p.orgVerified) ...[
-                            const SizedBox(width: 4),
-                            Icon(Icons.verified, size: 16, color: c.greenMid, semanticLabel: l.discoverVerified),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: Space.xl),
-                    Container(
-                      padding: const EdgeInsets.all(Space.xl),
-                      decoration: BoxDecoration(
-                        color: c.bg,
-                        borderRadius: BorderRadius.circular(Radii.xl),
-                        border: Border(left: BorderSide(color: c.saffron, width: 4), top: BorderSide(color: c.line), right: BorderSide(color: c.line), bottom: BorderSide(color: c.line)),
-                      ),
-                      child: Text(p.body, style: context.text.bodyLarge!.copyWith(color: c.ink, fontSize: 17, height: 1.6)),
-                    ),
-                    const SizedBox(height: Space.md),
-                    Text(l.pledgeSignatures(p.signatures), style: context.text.bodySmall),
-                    const SizedBox(height: Space.xl),
-                    if (mine != null)
-                      Notice(
-                        '${l.pledgeSigned}. ${l.pledgeSignedNo(mine.signatureNo, Fmt.dayYear(mine.signedAt))}',
-                        icon: Icons.check_circle_outline,
-                      )
-                    else if (!p.isActive)
-                      Notice(l.pledgeClosed, tone: TagTone.neutral),
-                    const SizedBox(height: Space.lg),
-                    Notice(l.pledgeWhatThisIsBody, title: l.pledgeWhatThisIs, tone: TagTone.neutral, icon: Icons.info_outline),
-                    if (p.canManage) ...[
-                      const SizedBox(height: Space.lg),
-                      OutlinedButton.icon(
-                        onPressed: () => PledgeEditRoute(code: p.shareCode).push<void>(context),
-                        icon: const Icon(Icons.edit_outlined),
-                        label: Text(l.commonEdit),
+                    Text(l.pledgeBy(p.orgName), style: context.text.bodyMedium),
+                    if (p.orgVerified) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.verified,
+                        size: 16,
+                        color: c.greenMid,
+                        semanticLabel: l.discoverVerified,
                       ),
                     ],
                   ],
                 ),
               ),
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(Space.page, Space.sm, Space.page, Space.md),
-                  child: mine != null
-                      ? (mine.certificateCode == null
-                          ? const SizedBox.shrink()
-                          : FilledButton.tonalIcon(
-                              onPressed: () => CertificateRoute(code: mine.certificateCode!).push<void>(context),
-                              icon: const Icon(Icons.workspace_premium_outlined),
-                              label: Text(l.passportViewCertificate),
-                            ))
-                      : FilledButton(
-                          onPressed: _busy || !p.isActive ? null : () => _sign(p),
-                          child: _busy
-                              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                              : Text(l.pledgeSign),
-                        ),
+              const SizedBox(height: Space.xl),
+              Container(
+                padding: const EdgeInsets.all(Space.xl),
+                decoration: BoxDecoration(
+                  color: c.bg,
+                  borderRadius: BorderRadius.circular(Radii.xl),
+                  border: Border(
+                    left: BorderSide(color: c.saffron, width: 4),
+                    top: BorderSide(color: c.line),
+                    right: BorderSide(color: c.line),
+                    bottom: BorderSide(color: c.line),
+                  ),
+                ),
+                child: Text(
+                  p.body,
+                  style: context.text.bodyLarge!.copyWith(
+                    color: c.ink,
+                    fontSize: 17,
+                    height: 1.6,
+                  ),
                 ),
               ),
+              const SizedBox(height: Space.md),
+              Text(
+                l.pledgeSignatures(p.signatures),
+                style: context.text.bodySmall,
+              ),
+              const SizedBox(height: Space.xl),
+              if (mine != null)
+                Notice(
+                  '${l.pledgeSigned}. ${l.pledgeSignedNo(mine.signatureNo, Fmt.dayYear(mine.signedAt))}',
+                  icon: Icons.check_circle_outline,
+                )
+              else if (!p.isActive)
+                Notice(l.pledgeClosed, tone: TagTone.neutral),
+              const SizedBox(height: Space.lg),
+              Notice(
+                l.pledgeWhatThisIsBody,
+                title: l.pledgeWhatThisIs,
+                tone: TagTone.neutral,
+                icon: Icons.info_outline,
+              ),
+              if (p.canManage) ...[
+                const SizedBox(height: Space.lg),
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      PledgeEditRoute(code: p.shareCode).push<void>(context),
+                  icon: const Icon(Icons.edit_outlined),
+                  label: Text(l.commonEdit),
+                ),
+              ],
             ],
           );
         },
+      ),
+      extendBody: true,
+      bottomNavigationBar: async.maybeWhen(
+        data: _actionBar,
+        orElse: () => null,
       ),
     );
   }

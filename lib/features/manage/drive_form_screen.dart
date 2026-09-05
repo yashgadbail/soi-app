@@ -171,7 +171,7 @@ class _DriveFormScreenState extends ConsumerState<DriveFormScreen> {
   Future<void> _cancelDrive() async {
     final l = AppLocalizations.of(context);
     final ok = await confirmDialog(context,
-        title: l.driveFormCancelConfirmTitle, body: l.driveFormCancelConfirmBody, confirmLabel: l.driveFormCancelDrive, destructive: true);
+        title: l.driveFormCancelConfirmTitle, body: l.driveFormCancelConfirmBody, confirmLabel: l.driveFormCancelDrive, cancelLabel: l.dialogKeepDrive, destructive: true);
     if (!ok) return;
     setState(() => _busy = true);
     try {
@@ -193,7 +193,7 @@ class _DriveFormScreenState extends ConsumerState<DriveFormScreen> {
   Future<bool> _confirmDiscard() async {
     if (!_dirty) return true;
     final l = AppLocalizations.of(context);
-    return await confirmDialog(context, title: l.driveFormUnsavedTitle, body: l.driveFormUnsavedBody, confirmLabel: l.driveFormDiscard, destructive: true);
+    return await confirmDialog(context, title: l.driveFormUnsavedTitle, body: l.driveFormUnsavedBody, confirmLabel: l.driveFormDiscard, cancelLabel: l.dialogKeepEditing, destructive: true);
   }
 
   @override
@@ -204,7 +204,8 @@ class _DriveFormScreenState extends ConsumerState<DriveFormScreen> {
 
     if (widget.isEdit && !_loaded) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.driveFormEditTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(l.driveFormEditTitle)),
         body: _formError == null ? const LoadingView() : ErrorView(error: SoiError(_formError!, SoiErrorKind.unknown), onRetry: _load),
       );
     }
@@ -217,12 +218,13 @@ class _DriveFormScreenState extends ConsumerState<DriveFormScreen> {
         if (discard && context.mounted) Navigator.of(context).pop();
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(widget.isEdit ? l.driveFormEditTitle : l.driveFormNewTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(widget.isEdit ? l.driveFormEditTitle : l.driveFormNewTitle)),
         body: Form(
           key: _form,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
-            padding: pagePadding,
+            padding: pageInsets(context),
             children: [
               if (!widget.isEdit && orgs.length > 1) ...[
                 SectionLabel(l.driveFormOrg),

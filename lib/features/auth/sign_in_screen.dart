@@ -124,10 +124,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final c = context.soi;
 
     return Scaffold(
-      appBar: AppBar(),
+      extendBodyBehindAppBar: true,
+      appBar: const GlassAppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: pagePadding,
+          padding: pageInsets(context),
           child: AutofillGroup(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

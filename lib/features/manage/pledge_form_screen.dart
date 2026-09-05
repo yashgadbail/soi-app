@@ -106,7 +106,8 @@ class _PledgeFormScreenState extends ConsumerState<PledgeFormScreen> {
 
     if (widget.isEdit && _existing == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.pledgeFormEditTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(l.pledgeFormEditTitle)),
         body: _error == null ? const LoadingView() : ErrorView(error: SoiError(_error!, SoiErrorKind.unknown), onRetry: _load),
       );
     }
@@ -115,16 +116,17 @@ class _PledgeFormScreenState extends ConsumerState<PledgeFormScreen> {
       canPop: !_dirty,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        final ok = await confirmDialog(context, title: l.driveFormUnsavedTitle, body: l.driveFormUnsavedBody, confirmLabel: l.driveFormDiscard, destructive: true);
+        final ok = await confirmDialog(context, title: l.driveFormUnsavedTitle, body: l.driveFormUnsavedBody, confirmLabel: l.driveFormDiscard, cancelLabel: l.dialogKeepEditing, destructive: true);
         if (ok && context.mounted) Navigator.of(context).pop();
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(widget.isEdit ? l.pledgeFormEditTitle : l.pledgeFormNewTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(widget.isEdit ? l.pledgeFormEditTitle : l.pledgeFormNewTitle)),
         body: Form(
           key: _form,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
-            padding: pagePadding,
+            padding: pageInsets(context),
             children: [
               TextFormField(
                 controller: _title,

@@ -34,7 +34,7 @@ class OnboardingIntentScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: pagePadding.copyWith(top: Space.xxxl),
+          padding: pageInsets(context).copyWith(top: Space.xxxl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -60,7 +60,8 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
     final roster = ref.watch(orgRosterProvider(widget.orgId));
 
     return Scaffold(
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(l.rosterTitle),
         actions: [IconButton(tooltip: l.rosterBulk, icon: const Icon(Icons.playlist_add), onPressed: _bulk)],
       ),
@@ -85,7 +86,7 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
           return CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: pagePadding.copyWith(bottom: 0),
+                padding: pageInsets(context).copyWith(bottom: 0),
                 sliver: SliverList.list(
                   children: [
                     Text(l.rosterLead, style: context.text.bodyMedium),
@@ -332,7 +333,7 @@ class _StudentSheet extends ConsumerStatefulWidget {
 class _StudentSheetState extends ConsumerState<_StudentSheet> {
   Future<void> _remove() async {
     final l = AppLocalizations.of(context);
-    final ok = await confirmDialog(context, title: l.rosterRemoveConfirmTitle(widget.student.fullName), body: l.rosterRemoveConfirmBody, confirmLabel: l.commonRemove, destructive: true);
+    final ok = await confirmDialog(context, title: l.rosterRemoveConfirmTitle(widget.student.fullName), body: l.rosterRemoveConfirmBody, confirmLabel: l.commonRemove, cancelLabel: l.dialogKeepMember, destructive: true);
     if (!ok || !mounted) return;
     try {
       await ref.read(orgsRepoProvider).removeStudent(widget.student.studentId);

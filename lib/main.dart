@@ -5,14 +5,15 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soi/app.dart';
 import 'package:soi/core/env.dart';
+import 'package:soi/core/theme/theme.dart';
 import 'package:soi/data/session.dart';
 import 'package:soi/data/snapshots.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(SoiTheme.systemBars(dark: false));
 
   if (!Env.isConfigured) {
     runApp(const _ConfigError());

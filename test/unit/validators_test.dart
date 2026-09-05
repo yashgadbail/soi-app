@@ -67,7 +67,7 @@ void main() {
       expect(Fmt.relativeDay(DateTime(2026, 9, 6, 23), now: now), 'Tomorrow');
       expect(Fmt.relativeDay(DateTime(2026, 9, 8), now: now), 'In 3 days');
       expect(Fmt.relativeDay(DateTime(2026, 9, 20), now: now), isNull);
-      expect(Fmt.relativeDay(DateTime(2026, 9, 1), now: now), isNull);
+      expect(Fmt.relativeDay(DateTime(2026, 9), now: now), isNull);
     });
 
     test('hours drop trailing zeros', () {

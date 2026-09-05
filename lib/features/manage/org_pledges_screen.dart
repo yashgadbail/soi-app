@@ -53,11 +53,11 @@ class _OrgPledgesScreenState extends ConsumerState<OrgPledgesScreen> {
     if (p.signatures > 0) {
       // Signed pledges cannot be deleted: everyone who signed holds a
       // certificate for these exact words. Offer the constructive path.
-      final close = await confirmDialog(context, title: l.pledgesDeleteBlockedTitle, body: l.pledgesDeleteBlockedBody, confirmLabel: l.pledgesClose);
+      final close = await confirmDialog(context, title: l.pledgesDeleteBlockedTitle, body: l.pledgesDeleteBlockedBody, confirmLabel: l.pledgesClose, cancelLabel: l.dialogKeepPledge, icon: Icons.lock_outline);
       if (close && p.isActive) await _toggleStatus(p);
       return;
     }
-    final ok = await confirmDialog(context, title: l.pledgesDeleteTitle, body: l.pledgesDeleteBody, confirmLabel: l.commonDelete, destructive: true);
+    final ok = await confirmDialog(context, title: l.pledgesDeleteTitle, body: l.pledgesDeleteBody, confirmLabel: l.commonDelete, cancelLabel: l.dialogKeepPledge, destructive: true);
     if (!ok) return;
     try {
       await ref.read(pledgesRepoProvider).delete(p.id);
@@ -135,7 +135,8 @@ class _OrgPledgesScreenState extends ConsumerState<OrgPledgesScreen> {
     final pledges = ref.watch(orgPledgesProvider(widget.orgId));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.pledgesTitle)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(l.pledgesTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => PledgeNewRoute(id: widget.orgId).push<void>(context),
         icon: const Icon(Icons.add),
@@ -150,7 +151,7 @@ class _OrgPledgesScreenState extends ConsumerState<OrgPledgesScreen> {
           }
           final visible = rows.where((p) => (_filter == _Filter.active) == p.isActive).toList();
           return ListView(
-            padding: pagePadding.copyWith(bottom: 96),
+            padding: pageInsets(context).copyWith(bottom: 96),
             children: [
               Row(
                 children: [

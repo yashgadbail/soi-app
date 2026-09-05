@@ -13,6 +13,7 @@ import 'package:soi/data/session.dart';
 import 'package:soi/features/passport/passport_screen.dart';
 import 'package:soi/l10n/generated/app_localizations.dart';
 import 'package:soi/router/routes.dart';
+import 'package:soi/ui/effects.dart';
 import 'package:soi/ui/states.dart';
 import 'package:soi/ui/widgets.dart';
 
@@ -306,11 +307,13 @@ class _ResultSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(color: c.greenSoft, shape: BoxShape.circle),
-          child: Icon(Icons.check_rounded, size: 34, color: c.greenDark),
+        PopIn(
+          child: Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(color: c.greenSoft, shape: BoxShape.circle),
+            child: Icon(Icons.check_rounded, size: 38, color: c.greenDark),
+          ),
         ),
         const SizedBox(height: Space.lg),
         Text(r.already ? l.checkInAlreadyTitle : l.checkInSuccessTitle, style: context.text.headlineSmall, textAlign: TextAlign.center),
@@ -320,8 +323,6 @@ class _ResultSheet extends StatelessWidget {
           style: context.text.bodyLarge,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: Space.md),
-        Notice(l.driveNothingCertifiedAuto, tone: TagTone.saffron, icon: Icons.hourglass_top_rounded),
         const SizedBox(height: Space.xl),
         FilledButton(
           onPressed: () {

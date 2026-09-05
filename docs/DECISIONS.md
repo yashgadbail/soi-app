@@ -97,7 +97,20 @@ Windows intermittently fails to close Kotlin's incremental caches during
 plugin compilation. Non-incremental builds are a few seconds slower and
 reliable. Gradle build cache stays on.
 
-## 015 Deferred from this release
+## 015 Orientation is not locked
+
+The v1 app locked portrait. A locked orientation letterboxes on foldables
+and tablets and fails the Android large-screen tiers; every list here is a
+sliver or list view with constrained content width, so landscape works.
+
+## 016 Glass is for chrome only
+
+Frosted surfaces are limited to bars that float over scrolling content (one
+BackdropFilter each). Cards, sheets and dialogs stay opaque: nested blurs
+are the fastest way to drop frames on a mid-range phone, and text on glass
+fails contrast checks.
+
+## 017 Deferred from this release
 
 Facet counts as date chips, a Passport hours chart, a share-my-passport image,
 Hindi strings (the ARB pipeline is ready), HTTPS App Links, iOS.

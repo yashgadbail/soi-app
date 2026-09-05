@@ -29,7 +29,7 @@ class OrgSettingsScreen extends ConsumerWidget {
 
   Future<void> _remove(BuildContext context, WidgetRef ref, OrgMember m) async {
     final l = AppLocalizations.of(context);
-    final ok = await confirmDialog(context, title: l.orgSettingsRemoveConfirmTitle(m.name ?? m.email ?? ''), body: l.orgSettingsRemoveConfirmBody, confirmLabel: l.commonRemove, destructive: true);
+    final ok = await confirmDialog(context, title: l.orgSettingsRemoveConfirmTitle(m.name ?? m.email ?? ''), body: l.orgSettingsRemoveConfirmBody, confirmLabel: l.commonRemove, cancelLabel: l.dialogKeepMember, destructive: true);
     if (!ok) return;
     try {
       await ref.read(orgsRepoProvider).removeMember(orgId: orgId, userId: m.userId);
@@ -51,7 +51,7 @@ class OrgSettingsScreen extends ConsumerWidget {
 
   Future<void> _leave(BuildContext context, WidgetRef ref, Membership m) async {
     final l = AppLocalizations.of(context);
-    final ok = await confirmDialog(context, title: l.orgSettingsLeaveConfirmTitle(m.orgName), body: l.orgSettingsLeaveConfirmBody, confirmLabel: l.orgSettingsLeave, destructive: true);
+    final ok = await confirmDialog(context, title: l.orgSettingsLeaveConfirmTitle(m.orgName), body: l.orgSettingsLeaveConfirmBody, confirmLabel: l.orgSettingsLeave, cancelLabel: l.dialogStay, destructive: true);
     if (!ok) return;
     try {
       await ref.read(orgsRepoProvider).leave(orgId);
@@ -78,14 +78,15 @@ class OrgSettingsScreen extends ConsumerWidget {
     final invites = m.isAdmin ? ref.watch(orgInvitesProvider(orgId)) : null;
 
     return Scaffold(
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(l.orgSettingsTitle),
         actions: [
           if (m.isAdmin) IconButton(tooltip: l.commonEdit, icon: const Icon(Icons.edit_outlined), onPressed: () => OrgEditRoute(id: orgId).push<void>(context)),
         ],
       ),
       body: ListView(
-        padding: pagePadding,
+        padding: pageInsets(context),
         children: [
           Row(
             children: [

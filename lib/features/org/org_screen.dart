@@ -27,12 +27,13 @@ class OrgScreen extends ConsumerWidget {
     final org = ref.watch(orgPublicProvider(id));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.orgTitle)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(l.orgTitle)),
       body: org.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orgPublicProvider(id))),
         data: (o) => ListView(
-          padding: pagePadding,
+          padding: pageInsets(context),
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,

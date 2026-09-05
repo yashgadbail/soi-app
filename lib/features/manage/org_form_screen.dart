@@ -99,18 +99,20 @@ class _OrgFormScreenState extends ConsumerState<OrgFormScreen> {
 
     if (widget.isEdit && !_loaded) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.orgFormEditTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(l.orgFormEditTitle)),
         body: _error == null ? const LoadingView() : ErrorView(error: SoiError(_error!, SoiErrorKind.unknown), onRetry: _load),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.isEdit ? l.orgFormEditTitle : l.orgFormNewTitle)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(widget.isEdit ? l.orgFormEditTitle : l.orgFormNewTitle)),
       body: Form(
         key: _form,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: ListView(
-          padding: pagePadding,
+          padding: pageInsets(context),
           children: [
             if (!widget.isEdit) ...[
               SectionLabel(l.orgFormType),

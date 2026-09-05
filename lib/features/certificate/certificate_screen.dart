@@ -75,7 +75,8 @@ class _CertificateScreenState extends ConsumerState<CertificateScreen> {
     final async = ref.watch(certificateProvider(widget.code));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.certificateTitle)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(l.certificateTitle)),
       body: async.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(certificateProvider(widget.code))),
@@ -88,7 +89,7 @@ class _CertificateScreenState extends ConsumerState<CertificateScreen> {
             );
           }
           return ListView(
-            padding: pagePadding,
+            padding: pageInsets(context),
             children: [
               RepaintBoundary(key: _boundary, child: CertificateCard(certificate: cert)),
               const SizedBox(height: Space.xl),

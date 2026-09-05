@@ -11,7 +11,7 @@ import 'package:soi/l10n/generated/app_localizations.dart';
 /// dark themes and at any text scale, because the holder shares the image
 /// and a verifier compares it. These goldens pin that.
 void main() {
-  setUpAll(() async => initializeDateFormatting('en_IN'));
+  setUpAll(() => initializeDateFormatting('en_IN'));
 
   final volunteering = Certificate(
     found: true,

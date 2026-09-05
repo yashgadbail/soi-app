@@ -169,7 +169,7 @@ class _CoordinatorModeScreenState extends ConsumerState<CoordinatorModeScreen> {
     final l = AppLocalizations.of(context);
     if (ids.isEmpty) return;
     final ok = await confirmDialog(context,
-        title: l.coordCertifyConfirmTitle(ids.length), body: l.coordCertifyConfirmBody, confirmLabel: l.coordCertify);
+        title: l.coordCertifyConfirmTitle(ids.length), body: l.coordCertifyConfirmBody, confirmLabel: l.coordCertify, cancelLabel: l.dialogNotYet, icon: Icons.verified_outlined);
     if (!ok) return;
     setState(() => _busy = true);
     try {
@@ -187,7 +187,7 @@ class _CoordinatorModeScreenState extends ConsumerState<CoordinatorModeScreen> {
   Future<void> _reject(RosterRow r) async {
     final l = AppLocalizations.of(context);
     final ok = await confirmDialog(context,
-        title: l.coordRejectConfirmTitle, body: l.coordRejectConfirmBody(r.displayName), confirmLabel: l.coordReject, destructive: true);
+        title: l.coordRejectConfirmTitle, body: l.coordRejectConfirmBody(r.displayName), confirmLabel: l.coordReject, cancelLabel: l.dialogKeepIt, destructive: true);
     if (!ok) return;
     try {
       await ref.read(driveRosterProvider(widget.driveId).notifier).reject([r.attendanceId]);
@@ -213,7 +213,8 @@ class _CoordinatorModeScreenState extends ConsumerState<CoordinatorModeScreen> {
     final certified = rows.where((r) => r.isCertified).length;
 
     return Scaffold(
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(l.coordTitle),
         actions: [
           drive.maybeWhen(
@@ -234,7 +235,7 @@ class _CoordinatorModeScreenState extends ConsumerState<CoordinatorModeScreen> {
       body: CustomScrollView(
         slivers: [
           SliverPadding(
-            padding: pagePadding,
+            padding: pageInsets(context),
             sliver: SliverList.list(
               children: [
                 drive.when(

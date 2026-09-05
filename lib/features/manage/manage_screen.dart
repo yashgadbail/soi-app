@@ -31,13 +31,15 @@ class _ManageScreenState extends ConsumerState<ManageScreen> {
 
     if (!session.isSignedIn) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.manageTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(l.manageTitle)),
         body: SignedOutView(onSignIn: () => const SignInRoute(from: '/manage').push<void>(context)),
       );
     }
     if (org == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.manageTitle)),
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(title: Text(l.manageTitle)),
         body: EmptyView(
           icon: Icons.corporate_fare_outlined,
           title: l.manageRegisterOrg,
@@ -50,7 +52,8 @@ class _ManageScreenState extends ConsumerState<ManageScreen> {
     final drives = ref.watch(orgDrivesProvider(org.orgId));
 
     return Scaffold(
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(l.manageTitle),
         actions: [
           if (session.coordinated.length > 1)
@@ -76,7 +79,7 @@ class _ManageScreenState extends ConsumerState<ManageScreen> {
           await ref.read(orgDrivesProvider(org.orgId).future);
         },
         child: ListView(
-          padding: pagePadding.copyWith(bottom: 96),
+          padding: pageInsets(context).copyWith(bottom: MediaQuery.paddingOf(context).bottom + 96),
           children: [
             SoiCard(
               onTap: () => OrgSettingsRoute(id: org.orgId).push<void>(context),

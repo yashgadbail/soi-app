@@ -57,6 +57,7 @@ Last updated: 5 September 2026.
 | Hindi strings | Medium | ARB pipeline ready; `app_hi.arb` not written. |
 | Keystore not backed up off-machine | High | Single point of unrecoverable failure. |
 | Play reviewer flow on dev | Medium | Create the reviewer user, run `attach_review_account()`, test the password path. |
+| Email templates still send links | High | Supabase sends `{{ .ConfirmationURL }}` by default; the app expects a code. Change both templates to `{{ .Token }}` — SUPABASE_SETUP.md §1. |
 
 ## Where to look
 

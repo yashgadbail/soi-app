@@ -39,6 +39,38 @@ Then **Authentication → Providers → Email**: keep *Enable email provider* on
 built-in SMTP allows only a few emails per hour; for the pilot connect the
 Brevo SMTP already used by production (Authentication → SMTP Settings).
 
+## 1b. SMTP (required before real users)
+
+The built-in sender (`noreply@mail.app.supabase.io`) is for development only:
+a few emails per hour, generic branding, and the rate limit cannot be raised
+while it is in use. Supabase itself sends no mail in production; you bring a
+provider.
+
+Recommended: **Brevo**, which the v1 production project already uses and
+which was verified end to end (300 emails/day on the free plan). Create a
+separate SMTP key for each Supabase project so one can be revoked alone.
+
+Dashboard → **Authentication → SMTP Settings** → *Enable custom SMTP*:
+
+| Field | Value |
+|---|---|
+| Sender email | `noreply@swagofindia.org` |
+| Sender name | SWAG of India |
+| Host | `smtp-relay.brevo.com` |
+| Port | 587 |
+| Username | the Brevo account login |
+| Password | the Brevo SMTP key (not the account password) |
+
+Then **Authentication → Rate Limits** → raise *emails sent per hour* (it stays
+at the low default until custom SMTP is enabled). Add the SPF and DKIM
+records Brevo provides to the sender domain's DNS so codes do not land in
+spam.
+
+Alternatives: Hostinger mailboxes (`smtp.hostinger.com`, 465, SSL, a real
+mailbox as login; lower daily caps), Resend or Amazon SES for volume. If the
+stack is ever self-hosted, the same values go into GoTrue's `SMTP_*`
+environment variables.
+
 ## 2. Redirect and site URL
 
 Authentication → URL Configuration: Site URL `https://soi.yashgb.com`. No

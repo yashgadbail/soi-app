@@ -20,6 +20,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  FLUTTER_VERSION: 3.47.2
+
 jobs:
   checks:
     runs-on: windows-latest
@@ -57,7 +60,6 @@ jobs:
     permissions:
       contents: write
     env:
-      FLUTTER_VERSION: 3.47.0
       ANDROID_BUILD_NUMBER: ${{ vars.ANDROID_BUILD_NUMBER }}
 
     steps:

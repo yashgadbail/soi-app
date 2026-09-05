@@ -88,8 +88,7 @@ class _CertificateScreenState extends ConsumerState<CertificateScreen> {
               body: l.certificateNotFoundBody,
             );
           }
-          return ListView(
-            padding: pageInsets(context),
+          return PageListView(
             children: [
               RepaintBoundary(key: _boundary, child: CertificateCard(certificate: cert)),
               const SizedBox(height: Space.xl),

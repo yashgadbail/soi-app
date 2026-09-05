@@ -127,8 +127,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       extendBodyBehindAppBar: true,
       appBar: const GlassAppBar(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: pageInsets(context),
+        child: PageScrollView(
           child: AutofillGroup(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

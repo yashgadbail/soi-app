@@ -232,10 +232,10 @@ class _CoordinatorModeScreenState extends ConsumerState<CoordinatorModeScreen> {
               icon: const Icon(Icons.verified_outlined),
               label: Text(l.coordCertifyAll(pendingIds.length)),
             ),
-      body: CustomScrollView(
+      body: PageInsets(builder: (context, insets) => CustomScrollView(
         slivers: [
           SliverPadding(
-            padding: pageInsets(context),
+            padding: insets,
             sliver: SliverList.list(
               children: [
                 drive.when(
@@ -352,7 +352,7 @@ class _CoordinatorModeScreenState extends ConsumerState<CoordinatorModeScreen> {
           if (rows.isNotEmpty && visible.isEmpty)
             SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(Space.xl), child: Text(l.discoverNoMatchTitle, style: context.text.bodyMedium, textAlign: TextAlign.center))),
         ],
-      ),
+      )),
     );
   }
 }

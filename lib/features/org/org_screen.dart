@@ -32,8 +32,7 @@ class OrgScreen extends ConsumerWidget {
       body: org.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orgPublicProvider(id))),
-        data: (o) => ListView(
-          padding: pageInsets(context),
+        data: (o) => PageListView(
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,

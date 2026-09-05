@@ -31,7 +31,7 @@ class GlassSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.soi;
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final tint = c.bg.withValues(alpha: opacity ?? (dark ? 0.72 : 0.78));
+    final tint = c.bg.withValues(alpha: opacity ?? (dark ? 0.62 : 0.66));
     final radius = borderRadius ?? BorderRadius.zero;
     return ClipRRect(
       borderRadius: radius,

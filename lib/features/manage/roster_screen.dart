@@ -83,10 +83,10 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
           }
           final keys = groups.keys.toList()..sort((a, b) => a.isEmpty ? 1 : b.isEmpty ? -1 : a.compareTo(b));
 
-          return CustomScrollView(
+          return PageInsets(builder: (context, insets) => CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: pageInsets(context).copyWith(bottom: 0),
+                padding: insets.copyWith(bottom: 0),
                 sliver: SliverList.list(
                   children: [
                     Text(l.rosterLead, style: context.text.bodyMedium),
@@ -129,7 +129,7 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 96)),
             ],
-          );
+          ));
         },
       ),
     );

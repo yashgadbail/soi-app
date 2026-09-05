@@ -53,8 +53,7 @@ class _NameEditScreenState extends ConsumerState<NameEditScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: Text(l.profileEditName)),
-      body: ListView(
-        padding: pageInsets(context),
+      body: PageListView(
         children: [
           Text(l.onboardNameLead, style: context.text.bodyMedium),
           const SizedBox(height: Space.xl),

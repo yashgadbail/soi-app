@@ -111,8 +111,7 @@ class _OrgFormScreenState extends ConsumerState<OrgFormScreen> {
       body: Form(
         key: _form,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: ListView(
-          padding: pageInsets(context),
+        child: PageListView(
           children: [
             if (!widget.isEdit) ...[
               SectionLabel(l.orgFormType),

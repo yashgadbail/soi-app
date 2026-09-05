@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:soi/core/errors/error_messages.dart';
 import 'package:soi/core/errors/soi_error.dart';
+import 'package:soi/core/theme/causes.dart';
 import 'package:soi/core/theme/tokens.dart';
 import 'package:soi/core/utils/format.dart';
 import 'package:soi/core/utils/validators.dart';
@@ -223,8 +224,7 @@ class _DriveFormScreenState extends ConsumerState<DriveFormScreen> {
         body: Form(
           key: _form,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: ListView(
-            padding: pageInsets(context),
+          child: PageListView(
             children: [
               if (!widget.isEdit && orgs.length > 1) ...[
                 SectionLabel(l.driveFormOrg),
@@ -250,7 +250,7 @@ class _DriveFormScreenState extends ConsumerState<DriveFormScreen> {
               Wrap(
                 spacing: Space.sm,
                 children: [
-                  for (final cause in kCauses)
+                  for (final cause in knownCauses)
                     SoiFilterChip(
                       label: cause,
                       selected: _cause == cause,

@@ -96,10 +96,10 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
           if (d.students.isEmpty) {
             return EmptyView(icon: Icons.groups_outlined, title: l.rosterEmptyTitle, body: l.rosterEmptyBody);
           }
-          return CustomScrollView(
+          return PageInsets(builder: (context, insets) => CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: pageInsets(context).copyWith(bottom: 0),
+                padding: insets.copyWith(bottom: 0),
                 sliver: SliverList.list(
                   children: [
                     Text(title, style: context.text.titleLarge),
@@ -168,7 +168,7 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
                 ),
               ),
             ],
-          );
+          ));
         },
       ),
     );

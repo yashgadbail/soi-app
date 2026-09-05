@@ -103,13 +103,10 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
     };
     final showPledges = _filter == _Filter.all || _filter == _Filter.pledges;
     final empty = p.attendance.isEmpty && p.pledges.isEmpty;
-    final bottomInset = MediaQuery.paddingOf(context).bottom + Space.xl;
-
     if (empty) {
       // No numbers when there is nothing to count: one card that says what
       // to do next, and the drive they already registered for, if any.
-      return ListView(
-        padding: pageInsets(context).copyWith(bottom: bottomInset),
+      return PageListView(
         children: [
           if (error != null) ...[
             ErrorView(error: error, onRetry: () => ref.invalidate(passportProvider), compact: true),
@@ -155,8 +152,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
       );
     }
 
-    return ListView(
-      padding: pageInsets(context).copyWith(bottom: bottomInset),
+    return PageListView(
       children: [
         if (error != null) ...[
           ErrorView(error: error, onRetry: () => ref.invalidate(passportProvider), compact: true),
@@ -294,9 +290,8 @@ class _PassportSkeleton extends StatelessWidget {
   const _PassportSkeleton();
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: pageInsets(context),
-      children: const [
+    return const PageListView(
+      children: [
         Shimmer(
           child: Column(
             children: [

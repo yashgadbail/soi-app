@@ -169,8 +169,7 @@ class _PledgeScreenState extends ConsumerState<PledgeScreen> {
         ),
         data: (p) {
           final mine = p.mySignature;
-          return ListView(
-            padding: pageInsets(context),
+          return PageListView(
             children: [
               Row(
                 children: [

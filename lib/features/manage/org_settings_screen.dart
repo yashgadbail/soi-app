@@ -85,8 +85,7 @@ class OrgSettingsScreen extends ConsumerWidget {
           if (m.isAdmin) IconButton(tooltip: l.commonEdit, icon: const Icon(Icons.edit_outlined), onPressed: () => OrgEditRoute(id: orgId).push<void>(context)),
         ],
       ),
-      body: ListView(
-        padding: pageInsets(context),
+      body: PageListView(
         children: [
           Row(
             children: [

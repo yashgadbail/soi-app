@@ -125,8 +125,7 @@ class _PledgeFormScreenState extends ConsumerState<PledgeFormScreen> {
         body: Form(
           key: _form,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: ListView(
-            padding: pageInsets(context),
+          child: PageListView(
             children: [
               TextFormField(
                 controller: _title,

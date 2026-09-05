@@ -78,8 +78,8 @@ class _ManageScreenState extends ConsumerState<ManageScreen> {
           ref.invalidate(orgDrivesProvider(org.orgId));
           await ref.read(orgDrivesProvider(org.orgId).future);
         },
-        child: ListView(
-          padding: pageInsets(context).copyWith(bottom: MediaQuery.paddingOf(context).bottom + 96),
+        child: PageListView(
+          extraBottom: 72,
           children: [
             SoiCard(
               onTap: () => OrgSettingsRoute(id: org.orgId).push<void>(context),

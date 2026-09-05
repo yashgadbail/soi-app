@@ -150,8 +150,8 @@ class _OrgPledgesScreenState extends ConsumerState<OrgPledgesScreen> {
             return EmptyView(icon: Icons.handshake_outlined, title: l.pledgesEmptyTitle, body: l.pledgesEmptyBody);
           }
           final visible = rows.where((p) => (_filter == _Filter.active) == p.isActive).toList();
-          return ListView(
-            padding: pageInsets(context).copyWith(bottom: 96),
+          return PageListView(
+            extraBottom: 72,
             children: [
               Row(
                 children: [

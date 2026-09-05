@@ -405,9 +405,114 @@ const pagePadding = EdgeInsets.fromLTRB(Space.page, Space.md, Space.page, 48);
 /// Page padding that also clears the frosted app bar above and the tab bar
 /// or gesture area below. Content scrolls *under* both bars (the blur needs
 /// something behind it), so lists must start and end clear of them.
-EdgeInsets pageInsets(BuildContext context) {
+///
+/// The [context] must be *inside* the Scaffold body: that is where the
+/// Scaffold publishes the bar heights as MediaQuery padding. Prefer
+/// [PageListView] / [PageScrollView] / [PageInsets], which guarantee it.
+EdgeInsets pageInsets(BuildContext context, {double? top, double extraBottom = 0}) {
   final mq = MediaQuery.paddingOf(context);
-  return EdgeInsets.fromLTRB(Space.page, mq.top + Space.md, Space.page, mq.bottom + Space.xxxl);
+  return EdgeInsets.fromLTRB(
+    Space.page,
+    top ?? mq.top + Space.md,
+    Space.page,
+    mq.bottom + Space.xxxl + extraBottom,
+  );
+}
+
+/// A ListView with the page insets measured from inside the body.
+class PageListView extends StatelessWidget {
+  const PageListView({required this.children, super.key, this.top, this.extraBottom = 0, this.controller});
+  final List<Widget> children;
+  final double? top;
+  final double extraBottom;
+  final ScrollController? controller;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+        controller: controller,
+        padding: pageInsets(context, top: top, extraBottom: extraBottom),
+        children: children,
+      );
+}
+
+/// A SingleChildScrollView with the page insets measured from inside the body.
+class PageScrollView extends StatelessWidget {
+  const PageScrollView({required this.child, super.key, this.top, this.extraBottom = 0});
+  final Widget child;
+  final double? top;
+  final double extraBottom;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+        padding: pageInsets(context, top: top, extraBottom: extraBottom),
+        child: child,
+      );
+}
+
+/// Hands a sliver-based body the correct insets.
+class PageInsets extends StatelessWidget {
+  const PageInsets({required this.builder, super.key});
+  final Widget Function(BuildContext context, EdgeInsets insets) builder;
+
+  @override
+  Widget build(BuildContext context) => builder(context, pageInsets(context));
+}
+
+/// The page ground: the brand colours as two soft light blooms, so frosted
+/// bars have colour to blur and the app never feels like a grey form. Painted
+/// once behind every route (see `SoiApp`); scaffolds are transparent.
+class BrandBackdrop extends StatelessWidget {
+  const BrandBackdrop({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.soi;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return RepaintBoundary(
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: c.bgAlt),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -120,
+              left: -80,
+              child: _Bloom(color: c.green.withValues(alpha: dark ? 0.22 : 0.16), size: 380),
+            ),
+            Positioned(
+              top: -40,
+              right: -140,
+              child: _Bloom(color: c.saffron.withValues(alpha: dark ? 0.16 : 0.18), size: 360),
+            ),
+            Positioned(
+              bottom: -160,
+              left: 40,
+              child: _Bloom(color: c.green.withValues(alpha: dark ? 0.12 : 0.08), size: 420),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Bloom extends StatelessWidget {
+  const _Bloom({required this.color, required this.size});
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)], stops: const [0.1, 1]),
+        ),
+      ),
+    );
+  }
 }
 
 /// A translucent, blurred app bar. Pair with `extendBodyBehindAppBar: true`

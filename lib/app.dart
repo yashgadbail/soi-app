@@ -5,6 +5,7 @@ import 'package:soi/core/theme/theme.dart';
 import 'package:soi/core/theme/tokens.dart';
 import 'package:soi/l10n/generated/app_localizations.dart';
 import 'package:soi/router/app_router.dart';
+import 'package:soi/ui/widgets.dart';
 
 class SoiApp extends ConsumerWidget {
   const SoiApp({super.key});
@@ -35,7 +36,7 @@ class SoiApp extends ConsumerWidget {
         final mq = MediaQuery.of(context);
         final capped = MediaQuery(
           data: mq.copyWith(textScaler: mq.textScaler.clamp(maxScaleFactor: 1.3)),
-          child: child!,
+          child: Stack(children: [const Positioned.fill(child: BrandBackdrop()), child!]),
         );
         return LayoutBuilder(
           builder: (context, constraints) {

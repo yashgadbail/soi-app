@@ -57,8 +57,7 @@ class _ClaimScreenState extends ConsumerState<ClaimScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: Text(l.claimTitle)),
-      body: ListView(
-        padding: pageInsets(context),
+      body: PageListView(
         children: [
           Text(l.claimLead, style: context.text.bodyLarge),
           const SizedBox(height: Space.xl),

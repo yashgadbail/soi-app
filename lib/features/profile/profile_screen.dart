@@ -77,8 +77,7 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: Text(l.profileTitle)),
-      body: ListView(
-        padding: pageInsets(context).copyWith(bottom: MediaQuery.paddingOf(context).bottom + Space.xl),
+      body: PageListView(
         children: [
           SoiCard(
             onTap: () => const NameEditRoute().push<void>(context),
@@ -129,18 +128,6 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () => const ClaimRoute().push<void>(context),
             icon: const Icon(Icons.school_outlined),
             label: Text(l.profileLinkSchool),
-          ),
-          const SizedBox(height: Space.xl),
-          SectionLabel(l.profileAppearance),
-          SoiCard(
-            padding: const EdgeInsets.symmetric(horizontal: Space.lg, vertical: Space.md),
-            child: Row(
-              children: [
-                Icon(Icons.brightness_auto_outlined, color: c.muted),
-                const SizedBox(width: Space.md),
-                Expanded(child: Text(l.profileAppearanceSystem, style: context.text.bodyMedium)),
-              ],
-            ),
           ),
           const SizedBox(height: Space.xl),
           SectionLabel(l.profileLegal),

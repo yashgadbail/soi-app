@@ -252,8 +252,7 @@ class _Body extends StatelessWidget {
       bannerTone = TagTone.neutral;
     }
 
-    return ListView(
-      padding: pageInsets(context),
+    return PageListView(
       children: [
         if (banner != null) ...[
           Notice(banner, tone: bannerTone, icon: Icons.info_outline),

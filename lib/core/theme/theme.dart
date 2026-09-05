@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:soi/core/theme/tokens.dart';
@@ -69,13 +68,14 @@ abstract final class SoiTheme {
       colorScheme: scheme,
       fontFamily: fontFamily,
       textTheme: text,
-      scaffoldBackgroundColor: c.bgAlt,
+      // Pages are transparent over the shared BrandBackdrop (see SoiApp).
+      scaffoldBackgroundColor: Colors.transparent,
       canvasColor: c.bgAlt,
       splashFactory: InkSparkle.splashFactory,
       visualDensity: VisualDensity.standard,
       extensions: [c],
       appBarTheme: AppBarTheme(
-        backgroundColor: c.bgAlt,
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         foregroundColor: c.ink,
         elevation: 0,
@@ -232,7 +232,9 @@ abstract final class SoiTheme {
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          // Pages are transparent over a shared backdrop, so a crossfade
+          // (not a slide that reveals the page beneath) is used on iOS too.
+          TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
         },
       ),
     );

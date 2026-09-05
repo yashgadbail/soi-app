@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:soi/core/theme/causes.dart';
 import 'package:soi/core/theme/tokens.dart';
 import 'package:soi/core/utils/format.dart';
 import 'package:soi/core/utils/validators.dart';
@@ -458,43 +459,67 @@ class DriveCard extends StatelessWidget {
     final d = drive;
     final when = Fmt.dayOrRelative(d.startsAt);
     final where = [d.venue, d.city].whereType<String>().join(', ');
+    final cause = causeStyle(d.cause);
+    final brightness = Theme.of(context).brightness;
     return PressScale(
       child: SoiCard(
         onTap: onTap,
+        padding: const EdgeInsets.all(Space.lg),
         semanticsLabel: '${d.title}, ${d.orgName}, $when, ${l.commonHours(d.defaultHours)}',
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                SoiTag(when, tone: TagTone.green),
-                if (d.registered) ...[
-                  const SizedBox(width: Space.sm),
-                  SoiTag(l.discoverRegistered, tone: TagTone.saffron, icon: Icons.check),
-                ],
-                const Spacer(),
-                Text(l.commonHoursShort(Fmt.hours(d.defaultHours)), style: context.text.titleMedium!.copyWith(color: c.green)),
-              ],
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: cause.soft(brightness),
+                borderRadius: BorderRadius.circular(Radii.md),
+              ),
+              child: Icon(cause.icon, color: cause.ink(brightness), size: 26),
             ),
-            const SizedBox(height: Space.md),
-            Text(d.title, style: context.text.titleLarge, maxLines: 2, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Flexible(child: Text(d.orgName, style: context.text.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis)),
-                if (d.orgVerified) ...[
-                  const SizedBox(width: 6),
-                  Icon(Icons.verified, size: 14, color: c.greenMid, semanticLabel: l.discoverVerified),
+            const SizedBox(width: Space.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(when, style: context.text.labelMedium!.copyWith(color: c.green)),
+                      if (d.registered) ...[
+                        const SizedBox(width: Space.sm),
+                        SoiTag(l.discoverRegistered, tone: TagTone.saffron, icon: Icons.check),
+                      ],
+                      const Spacer(),
+                      Text(l.commonHoursShort(Fmt.hours(d.defaultHours)),
+                          style: context.text.titleMedium!.copyWith(color: c.green)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(d.title, style: context.text.titleMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Flexible(child: Text(d.orgName, style: context.text.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      if (d.orgVerified) ...[
+                        const SizedBox(width: 4),
+                        Icon(Icons.verified_rounded, size: 14, color: c.greenMid, semanticLabel: l.discoverVerified),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: Space.md),
+                  _MetaLine(
+                    icon: Icons.schedule_rounded,
+                    text: [Fmt.time(d.startsAt), if (where.isNotEmpty) where].join(' · '),
+                  ),
+                  const SizedBox(height: 4),
+                  _MetaLine(
+                    icon: d.isFull ? Icons.block_rounded : Icons.people_outline_rounded,
+                    text: l.discoverSpotsLeft(d.spotsLeft),
+                    color: d.isFull ? c.danger : null,
+                  ),
                 ],
-              ],
-            ),
-            const SizedBox(height: Space.lg),
-            _MetaLine(icon: Icons.schedule, text: [if (d.cause != null) d.cause!, Fmt.time(d.startsAt)].join(' · ')),
-            const SizedBox(height: 6),
-            _MetaLine(
-              icon: Icons.place_outlined,
-              text: [if (where.isNotEmpty) where, l.discoverSpotsLeft(d.spotsLeft)].join(' · '),
-              color: d.isFull ? c.danger : null,
+              ),
             ),
           ],
         ),

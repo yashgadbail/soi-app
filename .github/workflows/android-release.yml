@@ -1,0 +1,163 @@
+name: Android CI and release
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Create a GitHub Release from this build
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore Dart dependencies
+        run: flutter pub get
+
+      - name: Analyze and test
+        run: |
+          flutter analyze
+          flutter test
+
+  release:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      FLUTTER_VERSION: 3.47.0
+      ANDROID_BUILD_NUMBER: ${{ vars.ANDROID_BUILD_NUMBER }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore Dart dependencies
+        run: flutter pub get
+
+      - name: Write build configuration
+        env:
+          SOI_DART_DEFINES: ${{ secrets.SOI_DART_DEFINES }}
+          SOI_UPLOAD_KEYSTORE_BASE64: ${{ secrets.SOI_UPLOAD_KEYSTORE_BASE64 }}
+          SOI_UPLOAD_STORE_PASSWORD: ${{ secrets.SOI_UPLOAD_STORE_PASSWORD }}
+          SOI_UPLOAD_KEY_ALIAS: ${{ secrets.SOI_UPLOAD_KEY_ALIAS }}
+          SOI_UPLOAD_KEY_PASSWORD: ${{ secrets.SOI_UPLOAD_KEY_PASSWORD }}
+        run: |
+          test -n "$SOI_DART_DEFINES"
+          test -n "$SOI_UPLOAD_KEYSTORE_BASE64"
+          test -n "$SOI_UPLOAD_STORE_PASSWORD"
+          test -n "$SOI_UPLOAD_KEY_ALIAS"
+          test -n "$SOI_UPLOAD_KEY_PASSWORD"
+          printf '%s' "$SOI_DART_DEFINES" > .env
+          printf '%s' "$SOI_UPLOAD_KEYSTORE_BASE64" | base64 --decode > android/soi-release.keystore
+          mkdir -p "$HOME/.gradle"
+          cat > "$HOME/.gradle/gradle.properties" <<EOF
+          SOI_UPLOAD_STORE_FILE=$GITHUB_WORKSPACE/android/soi-release.keystore
+          SOI_UPLOAD_STORE_PASSWORD=$SOI_UPLOAD_STORE_PASSWORD
+          SOI_UPLOAD_KEY_ALIAS=$SOI_UPLOAD_KEY_ALIAS
+          SOI_UPLOAD_KEY_PASSWORD=$SOI_UPLOAD_KEY_PASSWORD
+          EOF
+
+      - name: Choose Android build number
+        run: |
+          if [ -z "$ANDROID_BUILD_NUMBER" ]; then
+            ANDROID_BUILD_NUMBER=$((1000 + GITHUB_RUN_NUMBER))
+          fi
+          echo "BUILD_NUMBER=$ANDROID_BUILD_NUMBER" >> "$GITHUB_ENV"
+
+      - name: Build signed Android packages
+        run: |
+          flutter build appbundle --release \
+            --dart-define-from-file=.env \
+            --obfuscate \
+            --split-debug-info=build/symbols \
+            --build-number "$BUILD_NUMBER"
+          flutter build apk --release \
+            --dart-define-from-file=.env \
+            --obfuscate \
+            --split-debug-info=build/symbols \
+            --build-number "$BUILD_NUMBER"
+
+      - name: Install bundletool
+        run: |
+          curl --fail --location --output bundletool.jar \
+            https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar
+
+      - name: Verify signer and manifest
+        shell: pwsh
+        run: |
+          ./tools/verify-aab-signer.ps1 build/app/outputs/bundle/release/app-release.aab
+          ./tools/check-manifest.ps1 `
+            -Path build/app/outputs/bundle/release/app-release.aab `
+            -Bundletool bundletool.jar
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          cp build/app/outputs/bundle/release/app-release.aab release-files/soi-${BUILD_NUMBER}.aab
+          cp build/app/outputs/flutter-apk/app-release.apk release-files/soi-${BUILD_NUMBER}.apk
+          tar -czf release-files/soi-${BUILD_NUMBER}-symbols.tar.gz -C build symbols
+          cp build/app/outputs/mapping/release/mapping.txt release-files/soi-${BUILD_NUMBER}-mapping.txt
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: soi-android-${{ env.BUILD_NUMBER }}
+          path: release-files/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release == true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-${{ env.BUILD_NUMBER }}
+          name: SOI Android ${{ env.BUILD_NUMBER }}
+          generate_release_notes: true
+          files: release-files/*

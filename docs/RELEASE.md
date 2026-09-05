@@ -36,6 +36,40 @@ Outputs: `build/app/outputs/bundle/release/app-release.aab`, R8 mapping under
 (archive both with the release; upload the mapping to Play for readable
 crash reports).
 
+## GitHub Actions
+
+`.github/workflows/android-release.yml` runs analysis and tests on every pull
+request targeting `main`. After merge, it repeats those checks before building
+the signed AAB and APK, checking the signer and manifest, and storing the
+packages, mapping and Dart symbols as a 30-day Actions artifact. To enable it,
+add these repository secrets:
+
+- `SOI_DART_DEFINES`: the complete contents of the deployment `.env` file.
+- `SOI_UPLOAD_KEYSTORE_BASE64`: base64-encoded `soi-release.keystore`.
+- `SOI_UPLOAD_STORE_PASSWORD`, `SOI_UPLOAD_KEY_ALIAS`, `SOI_UPLOAD_KEY_PASSWORD`.
+
+The workflow automatically assigns a unique Android build number from the
+GitHub run number. If the current Play `versionCode` ever exceeds that value,
+set the optional repository variable `ANDROID_BUILD_NUMBER` to a higher value.
+A workflow-dispatch run with `publish_release` enabled additionally creates a
+GitHub Release; this does not upload to Google Play automatically.
+
+## Required branch protection
+
+In GitHub, protect `main` under **Settings -> Branches -> Add branch ruleset**:
+
+- Require a pull request before merging.
+- Require approvals (at least one reviewer).
+- Require status checks to pass, and select `Android CI and release / checks`.
+- Require branches to be up to date before merging.
+- Require conversation resolution before merging.
+- Do not allow force pushes or branch deletion.
+- Restrict direct pushes to administrators too, unless an emergency bypass is
+   intentionally needed.
+
+Do not select the `release` job as the PR requirement; it is intentionally
+skipped for pull requests because signing secrets must not be exposed there.
+
 ## Pre-upload checks (all must pass)
 
 ```powershell

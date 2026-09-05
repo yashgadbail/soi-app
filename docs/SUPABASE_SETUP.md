@@ -46,30 +46,35 @@ a few emails per hour, generic branding, and the rate limit cannot be raised
 while it is in use. Supabase itself sends no mail in production; you bring a
 provider.
 
-Recommended: **Brevo**, which the v1 production project already uses and
-which was verified end to end (300 emails/day on the free plan). Create a
-separate SMTP key for each Supabase project so one can be revoked alone.
+Chosen provider: **Hostinger email** (mailboxes on the hosting plan).
+
+First, hPanel → **Emails** → create a mailbox for the sender, e.g.
+`noreply@swagofindia.org` (or on whichever domain has email hosted there).
+Hostinger rejects mail whose From address is not the authenticated mailbox,
+so the sender email below must be that exact mailbox. Keep its password in a
+password manager; it goes only into the Supabase dashboard.
 
 Dashboard → **Authentication → SMTP Settings** → *Enable custom SMTP*:
 
 | Field | Value |
 |---|---|
-| Sender email | `noreply@swagofindia.org` |
+| Sender email | the mailbox, e.g. `noreply@swagofindia.org` |
 | Sender name | SWAG of India |
-| Host | `smtp-relay.brevo.com` |
-| Port | 587 |
-| Username | the Brevo account login |
-| Password | the Brevo SMTP key (not the account password) |
+| Host | `smtp.hostinger.com` |
+| Port | `465` (implicit SSL). If the dashboard reports a TLS handshake error, use `587` |
+| Username | the full mailbox address |
+| Password | the mailbox password |
 
-Then **Authentication → Rate Limits** → raise *emails sent per hour* (it stays
-at the low default until custom SMTP is enabled). Add the SPF and DKIM
-records Brevo provides to the sender domain's DNS so codes do not land in
-spam.
+Save, then **Authentication → Rate Limits** → set *emails sent per hour* to
+about 30 for the pilot (Hostinger mailboxes have a daily sending cap of a few
+hundred; stay well under it). Hostinger sets SPF and DKIM for its own
+mailboxes automatically when the domain's DNS is managed there; check hPanel
+→ Emails → DNS records if a code lands in spam.
 
-Alternatives: Hostinger mailboxes (`smtp.hostinger.com`, 465, SSL, a real
-mailbox as login; lower daily caps), Resend or Amazon SES for volume. If the
-stack is ever self-hosted, the same values go into GoTrue's `SMTP_*`
-environment variables.
+Alternatives if volume grows: Brevo (the v1 production project used it;
+`smtp-relay.brevo.com`, 587, 300/day free), Resend, Amazon SES. If the stack
+is ever self-hosted, the same values go into GoTrue's `SMTP_*` environment
+variables.
 
 ## 2. Redirect and site URL
 

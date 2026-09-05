@@ -1,0 +1,65 @@
+# --- secrets: never commit ---
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.pem
+android/key.properties
+android/keystore.properties
+android/gradle.properties.local
+google-services.json
+GoogleService-Info.plist
+*-service-account.json
+
+# --- local tooling / editor state (not part of the product) ---
+.claude/
+CLAUDE.md
+.claude-plugin/
+.mcp.json
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.iml
+.metadata
+
+# --- Flutter / Dart ---
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.g.dart.bak
+coverage/
+*.lcov
+
+# --- Android ---
+android/.gradle/
+android/app/.cxx/
+android/local.properties
+android/captures/
+android/**/GeneratedPluginRegistrant.java
+*.apk
+*.aab
+build/symbols/
+
+# --- iOS (not shipped yet) ---
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Runner/GeneratedPluginRegistrant.*
+
+# --- node tooling for the database scripts ---
+tools/node_modules/
+tools/.env
+
+# --- OS noise ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log

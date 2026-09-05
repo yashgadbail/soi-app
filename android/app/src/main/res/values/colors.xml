@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand "deep" green: splash and window background before Flutter paints. -->
+    <color name="soi_deep">#083D2D</color>
+    <color name="soi_bg_light">#FFFFFF</color>
+    <color name="soi_bg_dark">#0F1714</color>
+</resources>

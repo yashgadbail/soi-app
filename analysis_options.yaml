@@ -1,0 +1,35 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - lib/l10n/generated/**
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    # This is an application, not a package: doc comments on every public
+    # member are noise, and the formatter already owns trailing commas.
+    public_member_api_docs: false
+    require_trailing_commas: false
+    lines_longer_than_80_chars: false
+    # The generic error boundary (SoiError.from) deliberately catches
+    # everything the SDK can throw and normalises it.
+    avoid_catches_without_on_clauses: false
+    # Fire-and-forget is intentional in UI callbacks (refresh, haptics);
+    # anything that must complete is awaited explicitly.
+    discarded_futures: false
+    # The `this(...)` constructor shorthand is not used in this codebase.
+    unnecessary_type_name_in_constructor: false
+    # Widget constructors list `key`/`child` conventionally; ordering
+    # required-first would fight Flutter's own conventions.
+    always_put_required_named_parameters_first: false
+    sort_unnamed_constructors_first: false
+    # Builder-heavy widget code reads better without forced cascades.
+    cascade_invocations: false
+    # JSON handling in the repositories is typed at the boundary.
+    avoid_dynamic_calls: false

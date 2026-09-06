@@ -26,7 +26,7 @@ if ($Path -like '*.aab') {
 }
 
 $perms = $perms | Sort-Object -Unique
-Write-Host "Permissions in $Path:`n  $($perms -join "`n  ")"
+Write-Host "Permissions in ${Path}:`n  $($perms -join "`n  ")"
 $extra = $perms | Where-Object { $allow -notcontains $_ }
 if ($extra) {
   Write-Error "Unexpected permissions: $($extra -join ', '). Fix the manifest (tools:node=remove) before uploading."

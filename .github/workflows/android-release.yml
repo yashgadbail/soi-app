@@ -7,6 +7,22 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
+      play_track:
+        description: Upload the bundle to Google Play on this track ("none" only builds)
+        required: true
+        default: none
+        type: choice
+        options:
+          - none
+          - internal
+          - alpha
+          - beta
+          - production
+      rollout_fraction:
+        description: Share of users for a staged production rollout, between 0.01 and 1 (1 = everyone). Ignored on other tracks.
+        required: false
+        default: '0.1'
+        type: string
       publish_release:
         description: Create a GitHub Release from this build
         required: true
@@ -59,8 +75,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      build_number: ${{ steps.number.outputs.build_number }}
+      version_name: ${{ steps.number.outputs.version_name }}
     env:
       ANDROID_BUILD_NUMBER: ${{ vars.ANDROID_BUILD_NUMBER }}
+      PLAY_TRACK: ${{ inputs.play_track || 'none' }}
 
     steps:
       - name: Check out source
@@ -83,14 +103,26 @@ jobs:
       - name: Restore Dart dependencies
         run: flutter pub get
 
+      # A production upload is built from SOI_DART_DEFINES_PRODUCTION and from
+      # nothing else: if that secret is missing the job stops rather than
+      # falling back to the default (dev) configuration.
       - name: Write build configuration
         env:
           SOI_DART_DEFINES: ${{ secrets.SOI_DART_DEFINES }}
+          SOI_DART_DEFINES_PRODUCTION: ${{ secrets.SOI_DART_DEFINES_PRODUCTION }}
           SOI_UPLOAD_KEYSTORE_BASE64: ${{ secrets.SOI_UPLOAD_KEYSTORE_BASE64 }}
           SOI_UPLOAD_STORE_PASSWORD: ${{ secrets.SOI_UPLOAD_STORE_PASSWORD }}
           SOI_UPLOAD_KEY_ALIAS: ${{ secrets.SOI_UPLOAD_KEY_ALIAS }}
           SOI_UPLOAD_KEY_PASSWORD: ${{ secrets.SOI_UPLOAD_KEY_PASSWORD }}
         run: |
+          if [ "$PLAY_TRACK" = production ]; then
+            if [ -z "$SOI_DART_DEFINES_PRODUCTION" ]; then
+              echo "::error::SOI_DART_DEFINES_PRODUCTION is not set. Refusing to build a production upload against the default configuration."
+              exit 1
+            fi
+            SOI_DART_DEFINES="$SOI_DART_DEFINES_PRODUCTION"
+            echo "Building with the production configuration."
+          fi
           test -n "$SOI_DART_DEFINES"
           test -n "$SOI_UPLOAD_KEYSTORE_BASE64"
           test -n "$SOI_UPLOAD_STORE_PASSWORD"
@@ -107,11 +139,16 @@ jobs:
           EOF
 
       - name: Choose Android build number
+        id: number
         run: |
           if [ -z "$ANDROID_BUILD_NUMBER" ]; then
             ANDROID_BUILD_NUMBER=$((1000 + GITHUB_RUN_NUMBER))
           fi
+          VERSION_NAME=$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml)
           echo "BUILD_NUMBER=$ANDROID_BUILD_NUMBER" >> "$GITHUB_ENV"
+          echo "build_number=$ANDROID_BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "Version $VERSION_NAME build $ANDROID_BUILD_NUMBER"
 
       - name: Build signed Android packages
         run: |
@@ -163,3 +200,69 @@ jobs:
           name: SOI Android ${{ env.BUILD_NUMBER }}
           generate_release_notes: true
           files: release-files/*
+
+  # Manual runs only. The environment is play-<track>, so protection rules
+  # (required reviewers on play-production) gate the upload after the build
+  # has already been verified.
+  publish:
+    if: github.event_name == 'workflow_dispatch' && inputs.play_track != 'none'
+    needs: release
+    runs-on: ubuntu-latest
+    environment: play-${{ inputs.play_track }}
+    env:
+      BUILD_NUMBER: ${{ needs.release.outputs.build_number }}
+      VERSION_NAME: ${{ needs.release.outputs.version_name }}
+      PLAY_TRACK: ${{ inputs.play_track }}
+      ROLLOUT_FRACTION: ${{ inputs.rollout_fraction }}
+
+    steps:
+      - name: Check out release notes
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: distribution
+
+      - name: Download the verified bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: soi-android-${{ env.BUILD_NUMBER }}
+          path: release-files
+
+      - name: Decide release status
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::error::PLAY_SERVICE_ACCOUNT_JSON is not set (repository or play-$PLAY_TRACK environment secret)."
+            exit 1
+          fi
+          test -f "release-files/soi-${BUILD_NUMBER}.aab"
+          test -f "release-files/soi-${BUILD_NUMBER}-mapping.txt"
+          test -f distribution/whatsnew/whatsnew-en-US
+          STATUS=completed
+          USER_FRACTION=
+          if [ "$PLAY_TRACK" = production ]; then
+            if ! awk -v f="$ROLLOUT_FRACTION" 'BEGIN { exit !(f + 0 > 0 && f + 0 <= 1) }'; then
+              echo "::error::rollout_fraction must be between 0.01 and 1, got '$ROLLOUT_FRACTION'."
+              exit 1
+            fi
+            if awk -v f="$ROLLOUT_FRACTION" 'BEGIN { exit !(f + 0 < 1) }'; then
+              STATUS=inProgress
+              USER_FRACTION=$ROLLOUT_FRACTION
+            fi
+          fi
+          echo "STATUS=$STATUS" >> "$GITHUB_ENV"
+          echo "USER_FRACTION=$USER_FRACTION" >> "$GITHUB_ENV"
+          echo "Track $PLAY_TRACK, status $STATUS, user fraction '${USER_FRACTION:-all}', version $VERSION_NAME ($BUILD_NUMBER)"
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: org.swagofindia.soi
+          releaseFiles: release-files/soi-${{ env.BUILD_NUMBER }}.aab
+          releaseName: ${{ env.VERSION_NAME }} (${{ env.BUILD_NUMBER }})
+          track: ${{ env.PLAY_TRACK }}
+          status: ${{ env.STATUS }}
+          userFraction: ${{ env.USER_FRACTION }}
+          mappingFile: release-files/soi-${{ env.BUILD_NUMBER }}-mapping.txt
+          whatsNewDirectory: distribution/whatsnew

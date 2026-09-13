@@ -13,7 +13,7 @@ import pg from 'pg';
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is not set');
-if (!/wancnwamybngeihmwmcl|localhost|127\.0\.0\.1/.test(url)) {
+if (!/vkcbgcqeqxvaipsqqzev|localhost|127\.0\.0\.1/.test(url)) {
   throw new Error('Refusing: tests create throwaway auth users and must not run against production');
 }
 

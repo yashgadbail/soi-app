@@ -20,6 +20,7 @@ CLAUDE.md
 .mcp.json
 .vscode/*
 !.vscode/extensions.json
+!.vscode/launch.json
 .idea/
 *.iml
 .metadata

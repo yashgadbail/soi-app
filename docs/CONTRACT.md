@@ -50,7 +50,7 @@ implements the hierarchy and is what every policy and guard calls.
 Bounds: title 5–120, description ≤4000, cause ≤40, venue ≤160, city ≤60,
 capacity 1–5000, hours (0, 12], start ≥ now − 1 h on create.
 
-## Students and attendance (004, 009)
+## Students and attendance (004)
 
 | Function | Returns | Who | Keys |
 |---|---|---|---|

@@ -18,11 +18,11 @@ countersigns it. Every design decision defends that.
 ## Run it
 
 ```bash
-cp .env.example .env           # fill in SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY
+cp .env.example .env.dev       # fill in SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY
 flutter pub get
 dart run build_runner build    # models, providers, routes
 flutter gen-l10n               # strings
-flutter run --dart-define-from-file=.env
+flutter run --dart-define-from-file=.env.dev
 ```
 
 ## Check it

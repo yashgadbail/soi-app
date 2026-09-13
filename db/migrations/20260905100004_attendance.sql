@@ -103,7 +103,6 @@ begin
   return new;
 end $$;
 
-drop trigger if exists t2_link_students_on_signup on auth.users;
 create trigger t2_link_students_on_signup
   after insert on auth.users
   for each row execute function public.link_students_on_signup();
@@ -472,7 +471,27 @@ select public.grant_rpc('public.drive_detail(uuid)', true);
 select public.grant_rpc('public.org_drives(uuid)');
 select public.grant_rpc('public.organisation_public(uuid)', true);
 
+-- drive_marked_students(drive) -> uuid[]   (authenticated)
+-- A teacher marking pupils at another organisation's drive cannot read that
+-- roster, yet must see who is already marked so nobody is ticked twice.
+-- Returns only ids of the caller's own students with attendance there.
+create or replace function public.drive_marked_students(p_drive uuid)
+returns json language plpgsql stable security definer set search_path = public, extensions, pg_temp as $$
+declare v json;
+begin
+  perform public.require_user();
+  select coalesce(json_agg(a.student_id), '[]'::json) into v
+  from public.attendance a
+  join public.students s on s.id = a.student_id
+  where a.drive_id = p_drive
+    and public.is_org_member(s.org_id, 'coordinator');
+  return v;
+end $$;
+
+select public.grant_rpc('public.drive_marked_students(uuid)');
+
 -- migrate:down
+drop function if exists public.drive_marked_students(uuid);
 drop function if exists public.organisation_public(uuid);
 drop function if exists public.org_drives(uuid);
 drop function if exists public.drive_detail(uuid);
@@ -486,7 +505,6 @@ drop function if exists public.enrol_participant(uuid,text,text,text,text,text,t
 drop function if exists public.check_student_fields(text,text,text,text,text,text);
 drop function if exists public.mint_claim_code();
 drop function if exists public.normalise_phone(text);
-drop trigger if exists t2_link_students_on_signup on auth.users;
 drop function if exists public.link_students_on_signup();
 alter publication supabase_realtime drop table public.attendance;
 drop table if exists public.attendance;

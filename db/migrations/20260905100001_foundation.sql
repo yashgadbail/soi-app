@@ -92,6 +92,10 @@ begin
 end $$;
 
 -- ------------------------------------------------------------ privileges
+-- dbmate creates public.schema_migrations before this file runs, so it
+-- inherits Supabase's default grants; clients have no business reading it.
+revoke all on public.schema_migrations from public, anon, authenticated;
+
 select public.lock_fn('public.set_updated_at()');
 select public.lock_fn('public.grant_rpc(text,boolean)');
 select public.lock_fn('public.lock_fn(text)');

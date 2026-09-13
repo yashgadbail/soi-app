@@ -1,4 +1,7 @@
 # --- secrets: never commit ---
+.claude/
+CLAUDE.md
+.claude-plugin/
 .env
 .env.*
 !.env.example

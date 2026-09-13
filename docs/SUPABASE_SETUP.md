@@ -97,9 +97,13 @@ a strong password, **Auto Confirm = yes**. Then in SQL Editor:
 ```sql
 select public.attach_review_account();
 ```
-This names the profile, makes it owner of the demo organisation and creates
-a demo drive if none is upcoming. The app's "Sign in with a password
-instead" path is for this account.
+This names the profile, creates the review organisation (fixed id
+`44444444-…`) if it does not exist, makes the account its owner, and adds one
+**draft** drive so the reviewer can open Coordinator Mode, the roster and the
+check-in code from Manage. Nothing about it is public: draft drives never
+appear in Discover or the facets, and `soi_stats()` skips that organisation.
+Until this function runs, a database carries no review rows at all. The
+app's "Sign in with a password instead" path is for this account.
 
 ## 5. Test users (dev only)
 
@@ -109,4 +113,5 @@ not depend on email delivery. Sign in with the password path.
 ## 6. Keys for the app
 
 Project Settings → API: copy the **publishable** key and the project URL into
-`.env` (`SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`). Never the secret key.
+`.env.dev` or `.env.prod` (`SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`). Never the
+secret key.

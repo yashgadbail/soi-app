@@ -13,7 +13,7 @@
   SOI_UPLOAD_STORE_PASSWORD=…
   SOI_UPLOAD_KEY_PASSWORD=…
   ```
-  Gradle does not read `.env`. `android/app/build.gradle.kts` refuses to build
+  Gradle does not read the `.env.*` files. `android/app/build.gradle.kts` refuses to build
   a release bundle without these properties.
 
 ## Versioning
@@ -26,7 +26,7 @@ doubt: `--build-number <N>`.
 
 ```bash
 flutter build appbundle --release \
-  --dart-define-from-file=.env \
+  --dart-define-from-file=.env.prod \
   --obfuscate --split-debug-info=build/symbols \
   --build-number 6
 ```
@@ -52,8 +52,8 @@ crash reports).
 
 Repository secrets for `release`:
 
-- `SOI_DART_DEFINES`: the complete contents of the deployment `.env`
-  (the dev project until cutover).
+- `SOI_DART_DEFINES`: the three lines of `.env.dev` (internal and testing
+  builds run against the dev project).
 - `SOI_DART_DEFINES_PRODUCTION`: same shape, pointing at the production
   Supabase project. Read only when the track is `production`; the job stops
   if it is missing, so a production run can never silently ship the dev
@@ -149,9 +149,8 @@ The v2 schema is not the v1 schema. Before the Play release:
    and certificate codes: organizations→organisations, events→drives
    (+ codes into drive_checkin_codes), registrations, students, attendance,
    pledges, pledge_signatures, certificates, profiles, org_members.
-3. Put the production `.env` contents (URL + publishable key) in the
-   `SOI_DART_DEFINES_PRODUCTION` secret; for a local build, point `.env` at
-   production and rebuild.
+3. Put the three lines of `.env.prod` in the `SOI_DART_DEFINES_PRODUCTION`
+   secret; a local production build uses `--dart-define-from-file=.env.prod`.
 4. Existing users must sign in again (different session storage): say so in
    the Play "What's new".
 5. The web verify page calls `verify_certificate(p_code)` — unchanged.

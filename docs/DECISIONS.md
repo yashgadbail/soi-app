@@ -110,6 +110,17 @@ BackdropFilter each). Cards, sheets and dialogs stay opaque: nested blurs
 are the fastest way to drop frames on a mid-range phone, and text on glass
 fails contrast checks.
 
+## 018 Migrations carry no demo rows
+
+The store-review organisation used to be inserted by migration 008 on every
+database, production included, with a published demo drive. Now nothing is
+inserted until an operator creates the reviewer user and calls
+`attach_review_account()`; the drive it creates is a draft, and `soi_stats()`
+skips that organisation (010). A fresh production database therefore
+contains only schema. Client access to `schema_migrations` is revoked in
+010 because dbmate creates that table before Supabase's default grants can
+be overridden by a migration.
+
 ## 017 Deferred from this release
 
 Facet counts as date chips, a Passport hours chart, a share-my-passport image,

@@ -108,6 +108,6 @@ by a golden test). Body text scaling is capped at 1.3× app-wide.
 
 ## Build-time configuration
 
-`--dart-define-from-file=.env` supplies `SUPABASE_URL`,
+`--dart-define-from-file=.env.dev` (or `.env.prod`) supplies `SUPABASE_URL`,
 `SUPABASE_PUBLISHABLE_KEY`, `SOI_WEB_ORIGIN`. Missing values show a
 configuration error screen rather than crashing.

@@ -14,9 +14,6 @@ GoogleService-Info.plist
 *-service-account.json
 
 # --- local tooling / editor state (not part of the product) ---
-.claude/
-CLAUDE.md
-.claude-plugin/
 .mcp.json
 .vscode/*
 !.vscode/extensions.json

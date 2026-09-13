@@ -32,7 +32,7 @@ Last updated: 5 September 2026.
 |---|---|
 | Supabase URL + publishable key | `.env.dev` and `.env.prod` (gitignored) |
 | Dev database password | Not stored anywhere; the owner pastes it per session as `DATABASE_URL` |
-| Upload keystore | `E:\MOBILE-APPS\soi-signing\soi-release.keystore` |
+| Upload keystore | `soi-release.keystore`, outside every repository (path in `~/.gradle/gradle.properties`) |
 | Signing passwords | `~/.gradle/gradle.properties` (user-level, outside the repo) |
 | Play reviewer account | `play-review@swagofindia.org`; create in the dev project's Auth dashboard, then run `select public.attach_review_account()` |
 

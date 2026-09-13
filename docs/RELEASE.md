@@ -3,12 +3,13 @@
 ## Identity that must never change
 
 - Application id `org.swagofindia.soi` (same listing as the app on Play).
-- Upload key: `E:\MOBILE-APPS\soi-signing\soi-release.keystore`, alias `soi`.
+- Upload key: `soi-release.keystore`, alias `soi`, kept in a folder outside
+  every repository.
   Not in this repository. **Back it up off-machine.** Losing it means never
   updating the app again under this name.
 - Signing properties live in the user-level `~/.gradle/gradle.properties`:
   ```
-  SOI_UPLOAD_STORE_FILE=E:/MOBILE-APPS/soi-signing/soi-release.keystore
+  SOI_UPLOAD_STORE_FILE=<absolute path outside the repository>/soi-release.keystore
   SOI_UPLOAD_KEY_ALIAS=soi
   SOI_UPLOAD_STORE_PASSWORD=…
   SOI_UPLOAD_KEY_PASSWORD=…
@@ -131,7 +132,7 @@ skipped for pull requests because signing secrets must not be exposed there.
 
 ```powershell
 pwsh tools/verify-aab-signer.ps1 build/app/outputs/bundle/release/app-release.aab
-#   expect CN=Yash Gadbail
+#   expect the upload key fingerprint B8173D9C…873EBE86C
 pwsh tools/check-manifest.ps1 build/app/outputs/flutter-apk/app-release.apk
 #   (build a release APK for this check, or pass -Bundletool for the AAB)
 flutter analyze && flutter test

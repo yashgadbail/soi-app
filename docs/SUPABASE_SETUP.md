@@ -58,15 +58,15 @@ Dashboard → **Authentication → SMTP Settings** → *Enable custom SMTP*:
 
 | Field | Value |
 |---|---|
-| Sender email | `swagofindia@yashgb.com` (an alias of the `contact@yashgb.com` mailbox; aliases can send) |
+| Sender email | `swagofindia@yashgb.com` (an alias of the organisation's primary mailbox; aliases can send) |
 | Sender name | SWAG of India |
 | Host | `smtp.hostinger.com` |
 | Port | `465` (implicit SSL). If the dashboard reports a TLS handshake error, use `587` |
-| Username | `contact@yashgb.com` (the primary mailbox authenticates, not the alias) |
-| Password | the `contact@yashgb.com` mailbox password |
+| Username | the primary mailbox that owns the alias (the mailbox authenticates, not the alias) |
+| Password | that mailbox's password |
 
-Replies land in the `contact@` inbox. If saving fails because the sender
-must equal the login, use `contact@yashgb.com` as the sender instead.
+Replies land in that mailbox. If saving fails because the sender must equal
+the login, use the mailbox address itself as the sender instead.
 
 Save, then **Authentication → Rate Limits** → set *emails sent per hour* to
 about 30 for the pilot (Hostinger mailboxes have a daily sending cap of a few

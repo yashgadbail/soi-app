@@ -10,7 +10,7 @@ plugins {
 // The upload key never lives in this repository. Its path and passwords come
 // from the USER-level Gradle properties file (~/.gradle/gradle.properties):
 //
-//   SOI_UPLOAD_STORE_FILE=E:/MOBILE-APPS/soi-signing/soi-release.keystore
+//   SOI_UPLOAD_STORE_FILE=<absolute path outside the repository>/soi-release.keystore
 //   SOI_UPLOAD_KEY_ALIAS=soi
 //   SOI_UPLOAD_STORE_PASSWORD=...
 //   SOI_UPLOAD_KEY_PASSWORD=...

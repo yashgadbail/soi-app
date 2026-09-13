@@ -45,11 +45,15 @@ end $$;
 
 -- soi_stats() -> {organisations, drives, certified_hours, volunteers, pledges}   (public)
 -- Consumed by the landing page (web/index.html) and the Welcome screen.
+-- The store-review organisation (fixed id, see 008) is never counted.
 create or replace function public.soi_stats()
 returns json language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select json_build_object(
-    'organisations',   (select count(*) from public.organisations),
-    'drives',          (select count(*) from public.drives where status in ('published','completed')),
+    'organisations',   (select count(*) from public.organisations
+                         where id <> '44444444-4444-4444-4444-444444444444'),
+    'drives',          (select count(*) from public.drives
+                         where status in ('published','completed')
+                           and org_id <> '44444444-4444-4444-4444-444444444444'),
     'certified_hours', coalesce((select sum(hours) from public.attendance where status = 'certified'), 0),
     'volunteers',      (select count(*) from public.profiles),
     'pledges',         (select count(*) from public.pledge_signatures));

@@ -20,8 +20,8 @@ Last updated: 5 September 2026.
 | Surface | Where | State |
 |---|---|---|
 | Flutter app | this repository, branch `flutter` | Feature-complete: 25 screens, builds, analyzes clean, tests green, runs on device |
-| Dev database | Supabase project `vkcbgcqeqxvaipsqqzev` | blank on 13 Sep 2026; apply migrations 001–010 via dbmate, then the dashboard steps in SUPABASE_SETUP.md |
-| Previous dev database | Supabase project `wancnwamybngeihmwmcl` | migrations 001–009, test rows and two test accounts; the internal-track build 1012 still points at it |
+| Dev database | Supabase project `vkcbgcqeqxvaipsqqzev` | blank on 13 Sep 2026; apply migrations 001–008 via dbmate, then the dashboard steps in SUPABASE_SETUP.md |
+| Previous dev database | Supabase project `wancnwamybngeihmwmcl` | to be wiped with `tools/reset-db.mjs --auth-users` and re-migrated as the production backend; internal build 1012 still points at it |
 | Production database | Supabase project `eeodwxisgcpjnkawwcgf` (v1 schema, serving the live RN app) | Untouched by this work |
 | Web pages | `soi.yashgb.com` (landing, verify, privacy, delete-account, child-safety) hosted on Hostinger from the RN repo's `web/` | Unchanged; `verify_certificate` and `soi_stats` keep the same contract |
 | Play listing | `org.swagofindia.soi`, v1.2.0 (versionCode 5) in review | The Flutter build is versionCode 6 and has not been uploaded |

@@ -112,14 +112,17 @@ fails contrast checks.
 
 ## 018 Migrations carry no demo rows
 
-The store-review organisation used to be inserted by migration 008 on every
-database, production included, with a published demo drive. Now nothing is
-inserted until an operator creates the reviewer user and calls
-`attach_review_account()`; the drive it creates is a draft, and `soi_stats()`
-skips that organisation (010). A fresh production database therefore
-contains only schema. Client access to `schema_migrations` is revoked in
-010 because dbmate creates that table before Supabase's default grants can
-be overridden by a migration.
+No migration inserts rows. The store-review organisation is created only
+when an operator adds the reviewer user and calls `attach_review_account()`
+(008); the drive it creates is a draft, and `soi_stats()` (007) never counts
+that organisation. Client access to `schema_migrations` is revoked in 001
+because dbmate creates that table before any migration runs and it would
+otherwise inherit Supabase's default grants.
+
+Because no database had reached production, the set was rebaselined on
+13 Sep 2026 instead of patched: fixes were folded into the files that own
+the objects, and 001–008 create every object once in its final shape. From
+the first production apply onwards, migrations are append-only.
 
 ## 017 Deferred from this release
 

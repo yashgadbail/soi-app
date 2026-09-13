@@ -140,7 +140,6 @@ begin
   return new;
 end $$;
 
-drop trigger if exists t1_profile_on_signup on auth.users;
 create trigger t1_profile_on_signup
   after insert on auth.users
   for each row execute function public.handle_new_user();
@@ -376,7 +375,6 @@ drop function if exists public.create_organisation(text,text,text,text);
 drop function if exists public.my_memberships();
 drop function if exists public.my_profile();
 drop function if exists public.check_email(text);
-drop trigger if exists t1_profile_on_signup on auth.users;
 drop function if exists public.handle_new_user();
 drop table if exists public.org_invites;
 drop function if exists public.is_org_member(uuid,text);

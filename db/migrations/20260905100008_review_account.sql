@@ -1,6 +1,6 @@
 -- migrate:up
 -- =====================================================================
--- 008 app-review account
+-- 008 store-review account
 --
 -- Why:   store reviewers sign in with a password account that cannot
 --        receive email. They need an organisation to coordinate so both

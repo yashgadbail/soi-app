@@ -69,7 +69,6 @@ begin
   return new;
 end $$;
 
-drop trigger if exists t3_link_certificates_on_signup on auth.users;
 create trigger t3_link_certificates_on_signup
   after insert on auth.users
   for each row execute function public.link_certificates_on_signup();
@@ -243,7 +242,6 @@ drop function if exists public.revoke_certificate(text,text);
 drop function if exists public.verify_certificate(text);
 drop function if exists public.reject_attendance(uuid[]);
 drop function if exists public.certify_attendance(uuid[]);
-drop trigger if exists t3_link_certificates_on_signup on auth.users;
 drop function if exists public.link_certificates_on_signup();
 drop function if exists public.mint_certificate_code();
 drop table if exists public.certificates;
